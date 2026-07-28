@@ -1,1 +1,2 @@
-# restaurant-api-eks
+**Production-Grade Kubernetes Orchestration & Observability**  
+A resilient, secure, production-grade, cloud-native Kubernetes deployment on AWS, orchestrated using Terraform, Kubernetes, GitHub Actions, and ArgoCD. This is version 4 of a continuously evolving cloud-native system. Version 1 was the local Docker Compose deployment, version 2 was the local Kubernetes deployment with Observability, and version 3 was the production-grade serverless deployment.
