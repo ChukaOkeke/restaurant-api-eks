@@ -3,7 +3,7 @@
 # This file initializes the downloaded AWS provider binary and applies the operational rules, like the region and AWS account selection, and the global FinOps tagging strategy.
 # ==========================================
 
-# Primary Regional Provider
+# Primary Provider for the main deployment region
 provider "aws" {
   region = var.aws_primary_region
   # Access keys can be set in the environment variables or through the AWS CLI configuration
@@ -19,10 +19,10 @@ provider "aws" {
   }
 }
 
-# Global Edge Provider (For CloudFront WAF & ACM Certificate compliance).
+# Secondary Provider (For CloudFront WAF & ACM Certificate compliance).
 provider "aws" {
   alias  = "us_east_1"
-  region = var.aws_cloudfront_compliance_region
+  region = var.aws_secondary_region
 
   default_tags {
     tags = {

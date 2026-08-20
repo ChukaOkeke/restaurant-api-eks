@@ -3,25 +3,13 @@
 # This file passes the configuration values from your execution environment down into the root orchestrator.
 # ==========================================
 
-variable "aws_primary_profile" {
-  description = "The primary AWS CLI profile to use"
-  type        = string
-  default     = "iamadmin-project"
-}
-
 variable "aws_primary_region" {
   description = "The primary AWS region to deploy resources in"
   type        = string
   default     = "eu-west-1"
 }
 
-variable "aws_cloudfront_compliance_profile" {
-  description = "The AWS CLI profile to use for CloudFront compliance resources"
-  type        = string
-  default     = "iamadmin-project-us-east-1"
-}
-
-variable "aws_cloudfront_compliance_region" {
+variable "aws_secondary_region" {
   description = "The AWS region to deploy WAF and ACM for CloudFront in"
   type        = string
   default     = "us-east-1"
@@ -69,36 +57,6 @@ variable "db_port" {
 
 
 # MESSAGING CONFIGURATIONS (Asynchronous Queue Tuning)
-
-variable "queue_delay_seconds" {
-  type    = number
-  default = 0
-}
-
-variable "max_message_size" {
-  type    = number
-  default = 262144 # 256 KB (AWS Max standard)
-}
-
-variable "queue_retention_seconds" {
-  type    = number
-  default = 345600 # 4 Days
-}
-
-variable "visibility_timeout_seconds" {
-  type    = number
-  default = 60 # Matches Worker Lambda timeout nicely
-}
-
-variable "dlq_retention_seconds" {
-  type    = number
-  default = 1209600 # 14 Days (Max allowable to store errors for investigation)
-}
-
-variable "max_receive_count" {
-  type    = number
-  default = 5 # Retry 5 times before failing to DLQ
-}
 
 
 # SECURITY CONFIGURATIONS (OIDC CI/CD Settings)
