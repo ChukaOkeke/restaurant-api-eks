@@ -82,4 +82,18 @@ variable "domain_name" {
 }
 
 
-# COMPUTE CONFIGURATIONS 
+# ==========================================
+# EKS & PLATFORM ORCHESTRATION CONFIGURATIONS
+# ==========================================
+
+variable "cluster_name" {
+  type        = string
+  description = "The explicit name of the EKS cluster for tagging & discovery"
+  default     = "restaurant-api-eks"
+}
+
+variable "enable_single_nat_gateway" {
+  type        = bool
+  description = "Cost optimization flag: true for 1 NAT GW (dev), false for zonal NAT GWs (prod)"
+  default     = true
+}
