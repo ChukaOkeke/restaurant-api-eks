@@ -22,3 +22,24 @@ output "nat_gateway_ips" {
   description = "Public IP addresses of the deployed NAT Gateway(s)"
   value       = module.vpc.nat_gateway_ips
 }
+
+# --- Module 2: Security Groups Outputs ---
+output "alb_security_group_id" {
+  description = "ALB Security Group ID"
+  value       = module.endpoints_sg.alb_security_group_id
+}
+
+output "eks_control_plane_security_group_id" {
+  description = "EKS Control Plane Security Group ID"
+  value       = module.endpoints_sg.eks_control_plane_security_group_id
+}
+
+output "eks_node_security_group_id" {
+  description = "EKS Worker Nodes Security Group ID"
+  value       = module.endpoints_sg.eks_node_security_group_id
+}
+
+output "database_security_group_id" {
+  description = "RDS Database Security Group ID"
+  value       = module.endpoints_sg.database_security_group_id
+}

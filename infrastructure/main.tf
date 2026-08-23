@@ -17,3 +17,15 @@ module "vpc" {
   enable_single_nat_gateway = var.enable_single_nat_gateway
 }
 
+# ------------------------------------------------------------------------------
+# Module 2: VPC Endpoints & Security Groups
+# ------------------------------------------------------------------------------
+module "endpoints_sg" {
+  source = "./modules/endpoints-sg"
+
+  environment             = var.environment
+  vpc_id                  = module.vpc.vpc_id
+  private_subnet_ids      = module.vpc.private_subnet_ids
+  private_route_table_ids = module.vpc.private_route_table_ids
+  db_port                 = var.db_port
+}
