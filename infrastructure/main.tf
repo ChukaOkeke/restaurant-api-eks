@@ -29,3 +29,14 @@ module "endpoints_sg" {
   private_route_table_ids = module.vpc.private_route_table_ids
   db_port                 = var.db_port
 }
+
+# ------------------------------------------------------------------------------
+# Module 3: Security (App Secrets & OIDC Identity Federation)
+# ------------------------------------------------------------------------------
+module "security" {
+  source = "./modules/security"
+
+  environment = var.environment
+  github_org  = var.github_org
+  github_repo = var.github_repo
+}

@@ -43,3 +43,14 @@ output "database_security_group_id" {
   description = "RDS Database Security Group ID"
   value       = module.endpoints_sg.database_security_group_id
 }
+
+# --- Security Outputs ---
+output "app_secret_arn" {
+  description = "Application Secrets Manager Container ARN"
+  value       = module.security.app_secret_arn
+}
+
+output "github_actions_role_arn" {
+  description = "GitHub Actions OIDC Execution IAM Role ARN"
+  value       = module.security.github_actions_role_arn
+}
