@@ -11,6 +11,10 @@ resource "aws_vpc" "this" {
   enable_dns_hostnames = true # Required for EKS worker nodes & PrivateLink endpoints
   enable_dns_support   = true # Required for private DNS resolution within the VPC
 
+  # checkov:skip=CKV2_AWS_11:VPC Flow Logs are disabled in this sandbox environment to minimize high-volume CloudWatch log ingestion costs during rapid prototyping cycles.
+
+  # The default_tags from the root provider merge with this local block to ensure all resources get consistent tagging, while allowing for module-specific tags as needed
+
   tags = {
     Name = "restaurant-api-${var.environment}-vpc"
   }
@@ -36,6 +40,8 @@ resource "aws_subnet" "public" {
   cidr_block              = each.value
   availability_zone       = each.key
   map_public_ip_on_launch = true # Auto-assign public IPs to resources placed here
+
+  # checkov:skip=CKV_AWS_130:Public subnets must map public IPs on launch to allow public-facing infrastructure (like NAT Gateways or ALBs) to function. Compute and database nodes remain secured inside private subnets.
 
   tags = {
     Name = "restaurant-api-${var.environment}-public-${each.key}"
