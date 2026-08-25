@@ -127,3 +127,16 @@ variable "node_capacity_type" {
   type        = string
   default     = "ON_DEMAND"
 }
+
+# DATABASE CONFIGURATIONS
+variable "db_instance_class" {
+  type        = string
+  default     = "db.t4g.micro"
+  description = "RDS instance class (Graviton t4g series recommended for cost/performance)"
+}
+
+variable "multi_az" {
+  type        = bool
+  default     = false
+  description = "Enable Multi-AZ deployment (Keep false for dev cost optimization, set true in production)"
+}

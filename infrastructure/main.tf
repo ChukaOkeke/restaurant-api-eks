@@ -60,3 +60,16 @@ module "compute" {
   eks_node_security_group_id          = module.endpoints_sg.eks_node_security_group_id
   app_secret_arn                      = module.security.app_secret_arn
 }
+
+# ------------------------------------------------------------------------------
+# Module 5: Database (Subnet Group & RDS PostgreSQL instance)
+# ------------------------------------------------------------------------------
+module "database" {
+  source = "./modules/database"
+
+  environment        = var.environment
+  private_subnet_ids = module.vpc.private_subnet_ids
+  rds_sg_id          = module.endpoints_sg.database_security_group_id
+  db_instance_class  = var.db_instance_class
+  multi_az           = var.multi_az
+}
