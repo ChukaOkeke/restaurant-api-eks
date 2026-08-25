@@ -40,3 +40,23 @@ module "security" {
   github_org  = var.github_org
   github_repo = var.github_repo
 }
+
+# ------------------------------------------------------------------------------
+# Module 4: Compute (EKS Cluster, System Nodes, Pod Identity, ECR, & ArgoCD)
+# ------------------------------------------------------------------------------
+module "compute" {
+  source = "./modules/compute"
+
+  environment                         = var.environment
+  cluster_name                        = var.cluster_name
+  cluster_version                     = var.cluster_version
+  cluster_endpoint_private_access     = var.cluster_endpoint_private_access
+  cluster_endpoint_public_access      = var.cluster_endpoint_public_access
+  node_instance_types                 = var.node_instance_types
+  node_capacity_type                  = var.node_capacity_type
+  vpc_id                              = module.vpc.vpc_id
+  private_subnet_ids                  = module.vpc.private_subnet_ids
+  eks_control_plane_security_group_id = module.endpoints_sg.eks_control_plane_security_group_id
+  eks_node_security_group_id          = module.endpoints_sg.eks_node_security_group_id
+  app_secret_arn                      = module.security.app_secret_arn
+}

@@ -49,6 +49,12 @@ variable "private_subnets" {
   }
 }
 
+variable "enable_single_nat_gateway" {
+  type        = bool
+  description = "Cost optimization flag: true for 1 NAT GW (dev), false for zonal NAT GWs (prod)"
+  default     = true
+}
+
 variable "db_port" {
   type        = number
   description = "The network port for the database cluster"
@@ -92,8 +98,32 @@ variable "cluster_name" {
   default     = "restaurant-api-eks"
 }
 
-variable "enable_single_nat_gateway" {
+variable "cluster_version" {
+  description = "Kubernetes control plane version"
+  type        = string
+  default     = "1.36"
+}
+
+variable "cluster_endpoint_private_access" {
+  description = "Whether to enable private access to EKS control plane endpoint"
   type        = bool
-  description = "Cost optimization flag: true for 1 NAT GW (dev), false for zonal NAT GWs (prod)"
   default     = true
+}
+
+variable "cluster_endpoint_public_access" {
+  description = "Whether to enable public access to EKS control plane endpoint"
+  type        = bool
+  default     = true
+}
+
+variable "node_instance_types" {
+  description = "List of EC2 instance types for the node group"
+  type        = list(string)
+  default     = ["t3.medium"]
+}
+
+variable "node_capacity_type" {
+  description = "Instance capacity type: ON_DEMAND or SPOT"
+  type        = string
+  default     = "ON_DEMAND"
 }

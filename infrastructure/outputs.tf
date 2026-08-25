@@ -54,3 +54,19 @@ output "github_actions_role_arn" {
   description = "GitHub Actions OIDC Execution IAM Role ARN"
   value       = module.security.github_actions_role_arn
 }
+
+# --- Compute Outputs ---
+output "cluster_name" {
+  description = "Name of the EKS Cluster"
+  value       = module.compute.cluster_name
+}
+
+output "cluster_endpoint" {
+  description = "EKS API Server Endpoint"
+  value       = module.compute.cluster_endpoint
+}
+
+output "ecr_repository_url" {
+  description = "ECR Repository URL"
+  value       = module.compute.ecr_repository_url
+}
