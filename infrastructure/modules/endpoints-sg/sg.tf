@@ -143,8 +143,6 @@ resource "aws_vpc_security_group_ingress_rule" "nodes_from_control_plane" {
 resource "aws_vpc_security_group_ingress_rule" "nodes_intra_communication" {
   security_group_id            = aws_security_group.eks_nodes.id
   description                  = "Allow full pod-to-pod and node-to-node inter-communication"
-  from_port                    = 0
-  to_port                      = 0
   ip_protocol                  = "-1"
   referenced_security_group_id = aws_security_group.eks_nodes.id
 }
@@ -170,8 +168,6 @@ resource "aws_vpc_security_group_egress_rule" "nodes_to_database" {
 resource "aws_vpc_security_group_egress_rule" "nodes_outbound_internet" {
   security_group_id = aws_security_group.eks_nodes.id
   description       = "Allow worker nodes outbound access for external image pulls and public APIs"
-  from_port         = 0
-  to_port           = 0
   ip_protocol       = "-1"
   cidr_ipv4         = "0.0.0.0/0"
 

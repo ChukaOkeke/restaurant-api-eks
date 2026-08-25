@@ -33,3 +33,17 @@ provider "aws" {
     }
   }
 }
+
+# Helm Provider Configuration for ArgoCD Bootstrap
+provider "helm" {
+  kubernetes = {
+    host                   = module.compute.cluster_endpoint
+    cluster_ca_certificate = base64decode(module.compute.cluster_certificate_authority_data)
+
+    exec = {
+      api_version = "client.authentication.k8s.io/v1beta1"
+      args        = ["eks", "get-token", "--cluster-name", module.compute.cluster_name]
+      command     = "aws"
+    }
+  }
+}
