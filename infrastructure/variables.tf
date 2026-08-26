@@ -62,9 +62,6 @@ variable "db_port" {
 }
 
 
-# MESSAGING CONFIGURATIONS (Asynchronous Queue Tuning)
-
-
 # SECURITY CONFIGURATIONS (OIDC CI/CD Settings)
 
 variable "github_org" {
@@ -128,6 +125,7 @@ variable "node_capacity_type" {
   default     = "ON_DEMAND"
 }
 
+
 # DATABASE CONFIGURATIONS
 variable "db_instance_class" {
   type        = string
@@ -139,4 +137,48 @@ variable "multi_az" {
   type        = bool
   default     = false
   description = "Enable Multi-AZ deployment (Keep false for dev cost optimization, set true in production)"
+}
+
+
+# MESSAGING CONFIGURATIONS (Asynchronous Queue Tuning)
+variable "queue_delay_seconds" {
+  type        = number
+  default     = 0
+  description = "The time in seconds for which the delivery of all messages in the queue is delayed."
+}
+
+variable "max_message_size" {
+  type        = number
+  default     = 262144
+  description = "The limit of how many bytes a message can contain before Amazon SQS rejects it."
+}
+
+variable "queue_retention_seconds" {
+  type        = number
+  default     = 345600
+  description = "The number of seconds Amazon SQS retains a message in the primary queue."
+}
+
+variable "visibility_timeout_seconds" {
+  type        = number
+  default     = 30
+  description = "The visibility timeout for the queue in seconds."
+}
+
+variable "dlq_retention_seconds" {
+  type        = number
+  default     = 1209600
+  description = "The number of seconds Amazon SQS retains a message in the Dead Letter Queue."
+}
+
+variable "max_receive_count" {
+  type        = number
+  default     = 3
+  description = "The number of times a message is delivered to the source queue before being moved to the dead-letter queue."
+}
+
+variable "receive_wait_time_seconds" {
+  type        = number
+  default     = 20
+  description = "The duration (in seconds) for which the ReceiveMessage action waits for a message to arrive in the queue before returning. This enables long polling."
 }
