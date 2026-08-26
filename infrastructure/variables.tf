@@ -85,6 +85,14 @@ variable "domain_name" {
 }
 
 
+# CLOUDFRONT ROUTING CONFIGURATIONS
+variable "backend_domain_name" {
+  type        = string
+  default     = "api.asgardcuisines.link" # Target endpoint for backend compute / ingress controller
+  description = "Backend domain or Load Balancer endpoint target for CloudFront dynamic routing"
+}
+
+
 # ==========================================
 # EKS & PLATFORM ORCHESTRATION CONFIGURATIONS
 # ==========================================

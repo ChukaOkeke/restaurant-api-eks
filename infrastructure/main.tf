@@ -17,6 +17,7 @@ module "vpc" {
   enable_single_nat_gateway = var.enable_single_nat_gateway
 }
 
+
 # ------------------------------------------------------------------------------
 # Module 2: VPC Endpoints & Security Groups
 # ------------------------------------------------------------------------------
@@ -30,6 +31,7 @@ module "endpoints_sg" {
   db_port                 = var.db_port
 }
 
+
 # ------------------------------------------------------------------------------
 # Module 3: Security (App Secrets & OIDC Identity Federation)
 # ------------------------------------------------------------------------------
@@ -40,6 +42,7 @@ module "security" {
   github_org  = var.github_org
   github_repo = var.github_repo
 }
+
 
 # ------------------------------------------------------------------------------
 # Module 4: Compute (EKS Cluster, System Nodes, Pod Identity, ECR, & ArgoCD)
@@ -61,6 +64,7 @@ module "compute" {
   app_secret_arn                      = module.security.app_secret_arn
 }
 
+
 # ------------------------------------------------------------------------------
 # Module 5: Database (Subnet Group & RDS PostgreSQL instance)
 # ------------------------------------------------------------------------------
@@ -73,6 +77,7 @@ module "database" {
   db_instance_class  = var.db_instance_class
   multi_az           = var.multi_az
 }
+
 
 # ==============================================================================
 # Module 6: Messaging (SQS + DLQ)
@@ -90,6 +95,7 @@ module "messaging" {
   max_receive_count          = var.max_receive_count
 }
 
+
 # ==============================================================================
 # Module 7: Storage (S3 Static Assets Bucket)
 # ==============================================================================
@@ -97,4 +103,25 @@ module "storage" {
   source = "./modules/storage"
 
   environment = var.environment
+}
+
+
+# ==============================================================================
+# Module 8: Ingress Layer (ACM, Route 53, CloudFront & Edge WAF)
+# ==============================================================================
+module "ingress" {
+  source = "./modules/ingress"
+
+  # Explicit multi-region mapping authorization
+  providers = {
+    aws           = aws
+    aws.us_east_1 = aws.us_east_1
+  }
+
+  environment                        = var.environment
+  domain_name                        = var.domain_name
+  backend_domain_name                = var.backend_domain_name
+  static_bucket_arn                  = module.storage.s3_static_bucket_arn
+  static_bucket_id                   = module.storage.s3_static_bucket_id
+  static_bucket_regional_domain_name = module.storage.s3_bucket_regional_domain_name
 }
