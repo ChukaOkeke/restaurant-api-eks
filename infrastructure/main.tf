@@ -73,3 +73,19 @@ module "database" {
   db_instance_class  = var.db_instance_class
   multi_az           = var.multi_az
 }
+
+# ==============================================================================
+# Module 6: Messaging (SQS + DLQ)
+# ==============================================================================
+module "messaging" {
+  source = "./modules/messaging"
+
+  environment                = var.environment
+  dlq_retention_seconds      = var.dlq_retention_seconds
+  queue_delay_seconds        = var.queue_delay_seconds
+  max_message_size           = var.max_message_size
+  queue_retention_seconds    = var.queue_retention_seconds
+  receive_wait_time_seconds  = var.receive_wait_time_seconds
+  visibility_timeout_seconds = var.visibility_timeout_seconds
+  max_receive_count          = var.max_receive_count
+}
