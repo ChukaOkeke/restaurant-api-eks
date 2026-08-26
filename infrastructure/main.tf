@@ -89,3 +89,12 @@ module "messaging" {
   visibility_timeout_seconds = var.visibility_timeout_seconds
   max_receive_count          = var.max_receive_count
 }
+
+# ==============================================================================
+# Module 7: Storage (S3 Static Assets Bucket)
+# ==============================================================================
+module "storage" {
+  source = "./modules/storage"
+
+  environment = var.environment
+}
