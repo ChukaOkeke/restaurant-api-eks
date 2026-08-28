@@ -1,0 +1,57 @@
+# Restaurant Management API - Multi-Container Local Development Stack
+services:
+  # ---------------------------------------------------------------------------
+  # DATABASE SERVICE (PostgreSQL)
+  # ---------------------------------------------------------------------------
+  db:
+    image: postgres:16-alpine  # Lightweight official PostgreSQL 16 image
+    restart: always # Ensures DB restarts automatically on failure
+    environment:
+      # Maps variables from your local .env file to initialize the database
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "5432:5432" # Expose PostgreSQL locally for direct database client inspection
+    volumes:
+      - postgres_data:/var/lib/postgresql/data # Persistent named volume for local data
+    healthcheck:
+      # Native PostgreSQL binary check verifying the engine is accepting connections
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+
+      # How often to perform the check. 10s is a balance between responsiveness and CPU usage.
+      interval: 10s
+
+      # Max time allowed for a single check to complete before it's marked as a failure.
+      timeout: 10s
+
+      # Total failed attempts allowed before the container is officially labeled 'unhealthy'.
+      # 30 retries @ 10s interval = roughly 5 minutes of total waiting time.
+      retries: 30
+
+      # CRITICAL FOR WSL2: The grace period (in seconds) before Docker starts counting failures.
+      # PostgreSQL on WSL2 takes ~3 mins to initialize its internal system files on first run.
+      start_period: 180s
+
+
+  # ---------------------------------------------------------------------------
+  # WEB APPLICATION SERVICE (Django API)
+  # ---------------------------------------------------------------------------
+  web:
+    image: chukaokeke/restaurant-api:v4 # Pull custom Django image from Docker Hub
+    # Overrides production Gunicorn CMD to enable Django hot-reloading locally
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./src:/app  # Mounts host ./src containing entrypoint.sh directly to /app
+    ports:  # Bind to the same local host port
+      - "8000:8000"
+    env_file:
+      - .env  # Inject local environment variables into the Django container
+    environment:
+      - RUN_MIGRATIONS=true  # Triggers entrypoint.sh to run migrations automatically
+    depends_on:
+      db: # Django won't start until the database container is ready
+        condition: service_healthy  # Ensures Django waits until Postgres passes healthcheck
+
+volumes:
+  postgres_data: # Named volume for PostgreSQL data persistence
