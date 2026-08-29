@@ -17,6 +17,11 @@ output "acm_certificate_arn" {
   value       = aws_acm_certificate.api_cert.arn
 }
 
+output "alb_certificate_arn" {
+  description = "ARN of the regional ALB TLS ACM certificate"
+  value       = aws_acm_certificate.alb_cert.arn
+}
+
 output "waf_web_acl_arn" {
   description = "ARN of the global CloudFront WAF Web ACL"
   value       = aws_wafv2_web_acl.cloudfront_waf.arn

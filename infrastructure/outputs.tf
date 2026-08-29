@@ -143,6 +143,11 @@ output "acm_certificate_arn" {
   value       = module.ingress.acm_certificate_arn
 }
 
+output "alb_certificate_arn" {
+  description = "ARN of the regional ALB TLS ACM certificate"
+  value       = module.ingress.alb_certificate_arn
+}
+
 output "waf_acl_arn" {
   description = "ARN of the CloudFront WAF Web ACL"
   value       = module.ingress.waf_web_acl_arn
