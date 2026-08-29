@@ -1,0 +1,48 @@
+# Default values schema (Overridden by restaurant-api-eks-gitops/values/production/restaurant-api-values.yaml)
+
+replicaCount: 2
+
+image:
+  repository: chukaokeke/restaurant-api
+  pullPolicy: IfNotPresent
+  # The GitHub Actions CI pipeline will update this tag in the GitOps repo
+  tag: "latest"
+
+serviceAccount:
+  create: true
+  name: "restaurant-api-sa"
+  # EKS Pod Identities handle the IAM mapping, so no OIDC annotations are needed here
+
+env:
+  awsRegion: "eu-west-1"
+  djangoSettingsModule: "config.settings"
+
+# External Secrets Operator configuration
+secrets:
+  storeName: "aws-secrets" # Name of the ClusterSecretStore
+  awsSecretName: "prod/restaurant-api/credentials" # Name of the secret in AWS Secrets Manager
+
+service:
+  type: ClusterIP
+  port: 8000
+
+ingress:
+  enabled: true
+  className: "alb"
+  host: "api.asgardcuisines.link"
+  albSecurityGroup: "sg-0123456789abcdef0" # Replace via GitOps with Terraform output
+  certificateArn: "arn:aws:acm:..." # Replace via GitOps with Terraform output
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 512Mi
+  limits:
+    cpu: 500m
+    memory: 1Gi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70

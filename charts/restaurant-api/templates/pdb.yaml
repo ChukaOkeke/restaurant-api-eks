@@ -1,0 +1,11 @@
+# Pod Disruption Budget: Prevents cluster scale-down or node upgrades from taking all API pods offline
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ .Chart.Name }}-pdb
+  namespace: {{ .Release.Namespace }}
+spec:
+  minAvailable: 1   # At least one pod must be available at all times
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: api
