@@ -1,0 +1,31 @@
+# Zero Trust: Deny all ingress/egress by default, explicitly allow required traffic
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ .Chart.Name }}-network-policy
+  namespace: {{ .Release.Namespace }}
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: {{ .Chart.Name }}
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: ingress-nginx # Or ALB controller namespace depending on setup
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: kube-system # CoreDNS
+    ports:
+    - protocol: UDP
+      port: 53
+  - ports:
+    - protocol: TCP
+      port: 443 # AWS API Endpoints (SQS, Secrets Manager, ECR)
+    - protocol: TCP
+      port: 5432 # AWS RDS PostgreSQL
