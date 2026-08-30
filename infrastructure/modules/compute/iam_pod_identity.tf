@@ -32,7 +32,7 @@ resource "aws_iam_role_policy_attachment" "aws_lbc" {
 resource "aws_eks_pod_identity_association" "aws_lbc" {
   cluster_name    = aws_eks_cluster.this.name
   namespace       = "kube-system"
-  service_account = "aws-load-balancer-controller"
+  service_account = "aws-load-balancer-controller-sa"
   role_arn        = aws_iam_role.aws_lbc.arn
 }
 
@@ -82,7 +82,7 @@ resource "aws_iam_role_policy_attachment" "karpenter_controller" {
 resource "aws_eks_pod_identity_association" "karpenter" {
   cluster_name    = aws_eks_cluster.this.name
   namespace       = "karpenter"
-  service_account = "karpenter"
+  service_account = "karpenter-sa"
   role_arn        = aws_iam_role.karpenter_controller.arn
 }
 
@@ -176,11 +176,33 @@ resource "aws_iam_policy" "opencost" {
 
   policy = jsonencode({
     Version = "2012-10-17"
-    Statement = [{
-      Effect   = "Allow"
-      Action   = ["ce:GetCostAndUsage", "ce:GetDimensionValues", "ec2:DescribePricing"]
-      Resource = "*"
-    }]
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          # Cost Explorer
+          "ce:GetCostAndUsage",
+          "ce:GetDimensionValues",
+          
+          # AWS Price List API
+          "pricing:GetProducts",
+          "pricing:DescribeServices",
+          "pricing:GetAttributeValues"
+        ]
+        Resource = "*"
+      },
+      # For Amazon Managed Prometheus (AMP)
+      {
+        Effect = "Allow"
+        Action = [
+          "aps:QueryMetrics",
+          "aps:GetSeries",
+          "aps:GetLabels",
+          "aps:GetMetricMetadata"
+        ]
+        Resource = "*"
+      }
+    ]
   })
 
   tags = {
@@ -254,6 +276,6 @@ resource "aws_iam_role_policy_attachment" "external_dns" {
 resource "aws_eks_pod_identity_association" "external_dns" {
   cluster_name    = aws_eks_cluster.this.name
   namespace       = "kube-system"
-  service_account = "external-dns"
+  service_account = "external-dns-sa"
   role_arn        = aws_iam_role.external_dns.arn
 }
