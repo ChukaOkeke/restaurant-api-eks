@@ -233,8 +233,11 @@ resource "aws_eks_node_group" "system" {
   # Force node group update when EKS AMI version changes
   force_update_version = true
 
+  # Kubernetes labels applied to the nodes upon joining the cluster
   labels = {
-    "role" = "system"
+    # Matches the Helm values nodeSelector rule
+    "karpenter.sh/discovery" = var.cluster_name
+    "intent"                 = "system"
   }
 
   tags = {
