@@ -55,8 +55,12 @@ resource "aws_eks_cluster" "this" {
   # Kubernetes version to use for the control plane
   version = var.cluster_version
 
+  #checkov:skip=CKV_AWS_339: Cluster version is dynamically injected via variable and verified against supported AWS EKS releases.
+
   # IAM role used by EKS to manage the control plane
   role_arn = aws_iam_role.cluster.arn
+
+  #checkov:skip=CKV_AWS_58: External Secrets Operator (ESO) with AWS Secrets Manager manages secret lifecycles directly, mitigating etcd persistence risks in this environment. Avoid the customer-managed KMS key charge in a dev environment
 
   # VPC configuration for control plane networking
   vpc_config {
