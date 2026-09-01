@@ -62,6 +62,7 @@ module "compute" {
   eks_control_plane_security_group_id = module.endpoints_sg.eks_control_plane_security_group_id
   eks_node_security_group_id          = module.endpoints_sg.eks_node_security_group_id
   app_secret_arn                      = module.security.app_secret_arn
+  domain_name                         = var.domain_name
 }
 
 
