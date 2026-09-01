@@ -1,6 +1,6 @@
 # ==============================================================================
 # PRIVATE AMAZON ECR REPOSITORY
-# Storage location for application docker containers
+# Storage location for application docker containers.
 # ==============================================================================
 
 resource "aws_ecr_repository" "app" {
