@@ -242,7 +242,7 @@ resource "aws_iam_role" "external_dns" {
 
 resource "aws_iam_policy" "external_dns" {
   name        = "restaurant-api-${var.environment}-external-dns-policy"
-  description = "Allows ExternalDNS controller to discover and update Route 53 DNS records"
+  description = "Allows ExternalDNS controller to discover and update Route 53 DNS records."
 
   policy = jsonencode({
     Version = "2012-10-17"
