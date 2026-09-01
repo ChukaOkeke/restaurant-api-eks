@@ -169,6 +169,8 @@ resource "aws_launch_template" "system_nodes" {
   description   = "Launch template for EKS system node group custom security group attachment"
   ebs_optimized = true
 
+  #checkov:skip=CKV_AWS_341: Metadata response hop limit of 2 is required for EKS containerized CNI daemons and pod network namespaces to traverse IMDSv2.
+
   metadata_options {
     http_endpoint               = "enabled"
     http_tokens                 = "required" # Enforces IMDSv2
