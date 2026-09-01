@@ -5,7 +5,9 @@
 
 resource "aws_ecr_repository" "app" {
   name                 = "restaurant-api-${var.environment}-app"
-  image_tag_mutability = "MUTABLE"
+  image_tag_mutability = "IMMUTABLE"
+
+  #checkov:skip=CKV_AWS_136: Standard AWS AES-256 encryption at rest is sufficient for container image artifacts and avoids KMS overhead in dev.
 
   image_scanning_configuration {
     scan_on_push = true # Automated vulnerability scanning on push

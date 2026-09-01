@@ -61,3 +61,8 @@ variable "node_capacity_type" {
   description = "Instance capacity type: ON_DEMAND or SPOT"
   type        = string
 }
+
+variable "domain_name" {
+  type        = string
+  description = "Apex domain name registered in Route 53 (e.g., asgardcuisines.link)"
+}

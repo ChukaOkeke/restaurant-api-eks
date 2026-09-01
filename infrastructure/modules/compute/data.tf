@@ -44,3 +44,9 @@ data "http" "lbc_iam_policy" {
     Accept = "application/json"
   }
 }
+
+# Datasource: Fetches the pre-existing public hosted zone for domain validation & DNS records
+data "aws_route53_zone" "primary" {
+  name         = var.domain_name
+  private_zone = false
+}

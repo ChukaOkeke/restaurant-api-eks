@@ -53,6 +53,9 @@ resource "aws_iam_policy" "karpenter_controller" {
   name        = "restaurant-api-${var.environment}-karpenter-controller-policy"
   description = "Allows Karpenter controller to discover and provision EC2 instances"
 
+  #checkov:skip=CKV_AWS_290: Karpenter requires wildcard EC2 write access to dynamically provision compute nodes and launch templates on-demand.
+  #checkov:skip=CKV_AWS_355: Dynamic EC2 resource creation APIs cannot be scoped to explicit resource ARNs prior to instance launch.
+
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -172,7 +175,10 @@ resource "aws_iam_role" "opencost" {
 }
 
 resource "aws_iam_policy" "opencost" {
-  name = "restaurant-api-${var.environment}-opencost-policy"
+  name        = "restaurant-api-${var.environment}-opencost-policy"
+  description = "Allows OpenCost controller to fetch AWS pricing and cost metrics"
+
+  #checkov:skip=CKV_AWS_355: AWS Pricing and Cost Explorer APIs do not support resource-level ARNs and require wildcard resources by AWS design.
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -237,28 +243,28 @@ resource "aws_iam_role" "external_dns" {
 
 resource "aws_iam_policy" "external_dns" {
   name        = "restaurant-api-${var.environment}-external-dns-policy"
-  description = "Allows ExternalDNS controller to discover and update Route 53 DNS records"
+  description = "Allows ExternalDNS controller to discover and update Route 53 DNS records."
 
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
+        Sid    = "Route53GlobalDiscovery"
         Effect = "Allow"
         Action = [
-          "route53:ChangeResourceRecordSets"
+          "route53:ListHostedZones"
         ]
-        Resource = [
-          "arn:aws:route53:::hostedzone/*"
-        ]
+        Resource = "*"
       },
       {
+        Sid    = "Route53ZoneManagement"
         Effect = "Allow"
         Action = [
-          "route53:ListHostedZones",
+          "route53:ChangeResourceRecordSets",
           "route53:ListResourceRecordSets",
           "route53:ListTagsForResource"
         ]
-        Resource = "*"
+        Resource = "arn:aws:route53:::hostedzone/${data.aws_route53_zone.primary.zone_id}"
       }
     ]
   })

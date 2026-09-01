@@ -12,6 +12,7 @@ resource "aws_vpc" "this" {
   enable_dns_support   = true # Required for private DNS resolution within the VPC
 
   # checkov:skip=CKV2_AWS_11:VPC Flow Logs are disabled in this sandbox environment to minimize high-volume CloudWatch log ingestion costs during rapid prototyping cycles.
+  #checkov:skip=CKV2_AWS_12: Default VPC security group implemented in security group module.
 
   # The default_tags from the root provider merge with this local block to ensure all resources get consistent tagging, while allowing for module-specific tags as needed
 

@@ -129,6 +129,10 @@ resource "aws_vpc_security_group_ingress_rule" "nodes_from_alb" {
   to_port                      = 65535
   ip_protocol                  = "tcp"
   referenced_security_group_id = aws_security_group.alb.id
+
+  #checkov:skip=CKV_AWS_24: Ingress restricted strictly to ALB security group reference.
+  #checkov:skip=CKV_AWS_25: Ingress restricted strictly to ALB security group reference.
+  #checkov:skip=CKV_AWS_260: Ingress restricted strictly to ALB security group reference.
 }
 
 resource "aws_vpc_security_group_ingress_rule" "nodes_from_control_plane" {
@@ -138,6 +142,10 @@ resource "aws_vpc_security_group_ingress_rule" "nodes_from_control_plane" {
   to_port                      = 65535
   ip_protocol                  = "tcp"
   referenced_security_group_id = aws_security_group.eks_control_plane.id
+
+  #checkov:skip=CKV_AWS_24: Ingress restricted strictly to EKS Control Plane security group reference.
+  #checkov:skip=CKV_AWS_25: Ingress restricted strictly to EKS Control Plane security group reference.
+  #checkov:skip=CKV_AWS_260: Ingress restricted strictly to EKS Control Plane security group reference
 }
 
 resource "aws_vpc_security_group_ingress_rule" "nodes_intra_communication" {
@@ -192,4 +200,17 @@ resource "aws_vpc_security_group_ingress_rule" "database_from_nodes" {
   to_port                      = var.db_port
   ip_protocol                  = "tcp"
   referenced_security_group_id = aws_security_group.eks_nodes.id
+}
+
+
+# -------------------------------------------------------------------------
+#  VPC DEFAULT SECURITY GROUP 
+# -------------------------------------------------------------------------
+resource "aws_default_security_group" "default" {
+  vpc_id = var.vpc_id
+
+  # Stripped of all default rules to ensure zero-trust isolation by default
+  tags = {
+    Name = "restaurant-api-${var.environment}-default-sg"
+  }
 }

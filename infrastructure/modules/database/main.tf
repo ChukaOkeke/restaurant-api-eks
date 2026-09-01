@@ -30,8 +30,14 @@ resource "aws_db_instance" "this" {
   # Best Practice: AWS automatically manages, rotates, and stores the password in Secrets Manager
   manage_master_user_password = true
 
+  deletion_protection = var.environment == "prod" ? true : false
+
+  #checkov:skip=CKV_AWS_293: Deletion protection parameterized and disabled in dev/staging to enable automated ephemeral stack teardowns.
+
   db_subnet_group_name   = aws_db_subnet_group.this.name
   vpc_security_group_ids = [var.rds_sg_id]
+
+  #checkov:skip=CKV_AWS_157: Multi-AZ disabled in dev/staging environments to optimize infrastructure costs.
 
   multi_az            = var.multi_az
   publicly_accessible = false # Ensures the RDS instance is not exposed to the public internet, enhancing security by restricting access to within the VPC
@@ -53,6 +59,7 @@ resource "aws_db_instance" "this" {
   # checkov:skip=CKV_AWS_139: No deletion protection to allow easy teardown during development; production environments should set this to true
   # checkov:skip=CKV2_AWS_27:Full PostgreSQL statement query logging is disabled in the development tier to reduce unnecessary CloudWatch log volume overhead and storage baseline costs.
   # checkov:skip=CKV2_AWS_8:Centralized AWS Backup service assignment is bypassed because the cluster uses standard native Aurora automated snapshots and PITR, which are sufficient for dev/sandbox recovery without duplicate cost tiers.
+  # checkov:skip=CKV2_AWS_30: Detailed PostgreSQL query statement logging is bypassed in dev to avoid expensive CloudWatch log ingestion fees and disk I/O overhead.
 
   tags = {
     Name = "restaurant-api-${var.environment}-db"

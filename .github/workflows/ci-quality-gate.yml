@@ -178,6 +178,8 @@ jobs:
         with:
           directory: ./infrastructure
           framework: terraform
-          soft_fail: true # Hard fail on any findings to enforce security perimeter integrity
+          soft_fail: false # Hard fail on any findings to enforce security perimeter integrity
           output_format: cli
           download_external_modules: true
+          quiet: true  # Suppresses all PASSED checks so only actionable FAILED checks print to the console.
+          compact: true  # Trims extra guide/file metadata lines per finding to keep logs brief and scannable.
