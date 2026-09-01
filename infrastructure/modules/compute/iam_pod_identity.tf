@@ -183,7 +183,7 @@ resource "aws_iam_policy" "opencost" {
           # Cost Explorer
           "ce:GetCostAndUsage",
           "ce:GetDimensionValues",
-          
+
           # AWS Price List API
           "pricing:GetProducts",
           "pricing:DescribeServices",
