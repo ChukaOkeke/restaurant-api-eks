@@ -54,6 +54,7 @@ resource "aws_iam_policy" "karpenter_controller" {
   description = "Allows Karpenter controller to discover and provision EC2 instances"
 
   #checkov:skip=CKV_AWS_290: Karpenter requires wildcard EC2 write access to dynamically provision compute nodes and launch templates on-demand.
+  #checkov:skip=CKV_AWS_355: Dynamic EC2 resource creation APIs cannot be scoped to explicit resource ARNs prior to instance launch.
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -248,20 +249,20 @@ resource "aws_iam_policy" "external_dns" {
     Version = "2012-10-17"
     Statement = [
       {
-        Sid    = "Route53ReadAccess"
+        Sid    = "Route53GlobalDiscovery"
         Effect = "Allow"
         Action = [
-          "route53:ListHostedZones",
-          "route53:ListResourceRecordSets",
-          "route53:ListTagsForResource"
+          "route53:ListHostedZones"
         ]
         Resource = "*"
       },
       {
-        Sid    = "Route53ZoneRecordMutation"
+        Sid    = "Route53ZoneManagement"
         Effect = "Allow"
         Action = [
-          "route53:ChangeResourceRecordSets"
+          "route53:ChangeResourceRecordSets",
+          "route53:ListResourceRecordSets",
+          "route53:ListTagsForResource"
         ]
         Resource = "arn:aws:route53:::hostedzone/${data.aws_route53_zone.primary.zone_id}"
       }

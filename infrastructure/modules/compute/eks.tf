@@ -61,6 +61,8 @@ resource "aws_eks_cluster" "this" {
   role_arn = aws_iam_role.cluster.arn
 
   #checkov:skip=CKV_AWS_58: External Secrets Operator (ESO) with AWS Secrets Manager manages secret lifecycles directly, mitigating etcd persistence risks in this environment. Avoid the customer-managed KMS key charge in a dev environment
+  #checkov:skip=CKV_AWS_39: Public API endpoint enabled to allow external GitHub Actions CI/CD deployment without complex VPN/Bastion infrastructure overhead.
+  #checkov:skip=CKV_AWS_38: Public access CIDR unrestricted to allow dynamic GitHub Actions hosted runners to execute kubectl/Helm deployments.
 
   # VPC configuration for control plane networking
   vpc_config {
@@ -166,6 +168,12 @@ resource "aws_launch_template" "system_nodes" {
   name_prefix   = "${var.cluster_name}-system-node-lt-"
   description   = "Launch template for EKS system node group custom security group attachment"
   ebs_optimized = true
+
+  metadata_options {
+    http_endpoint               = "enabled"
+    http_tokens                 = "required" # Enforces IMDSv2
+    http_put_response_hop_limit = 2          # Required for EKS containerized workloads
+  }
 
   # Security groups for the worker nodes
   vpc_security_group_ids = [
