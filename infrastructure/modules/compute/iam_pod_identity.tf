@@ -53,6 +53,8 @@ resource "aws_iam_policy" "karpenter_controller" {
   name        = "restaurant-api-${var.environment}-karpenter-controller-policy"
   description = "Allows Karpenter controller to discover and provision EC2 instances"
 
+  #checkov:skip=CKV_AWS_290: Karpenter requires wildcard EC2 write access to dynamically provision compute nodes and launch templates on-demand.
+
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -172,7 +174,10 @@ resource "aws_iam_role" "opencost" {
 }
 
 resource "aws_iam_policy" "opencost" {
-  name = "restaurant-api-${var.environment}-opencost-policy"
+  name        = "restaurant-api-${var.environment}-opencost-policy"
+  description = "Allows OpenCost controller to fetch AWS pricing and cost metrics"
+
+  #checkov:skip=CKV_AWS_355: AWS Pricing and Cost Explorer APIs do not support resource-level ARNs and require wildcard resources by AWS design.
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -243,15 +248,7 @@ resource "aws_iam_policy" "external_dns" {
     Version = "2012-10-17"
     Statement = [
       {
-        Effect = "Allow"
-        Action = [
-          "route53:ChangeResourceRecordSets"
-        ]
-        Resource = [
-          "arn:aws:route53:::hostedzone/*"
-        ]
-      },
-      {
+        Sid    = "Route53ReadAccess"
         Effect = "Allow"
         Action = [
           "route53:ListHostedZones",
@@ -259,6 +256,14 @@ resource "aws_iam_policy" "external_dns" {
           "route53:ListTagsForResource"
         ]
         Resource = "*"
+      },
+      {
+        Sid    = "Route53ZoneRecordMutation"
+        Effect = "Allow"
+        Action = [
+          "route53:ChangeResourceRecordSets"
+        ]
+        Resource = "arn:aws:route53:::hostedzone/${data.aws_route53_zone.primary.zone_id}"
       }
     ]
   })
