@@ -41,7 +41,7 @@ jobs:
               - '.github/workflows/ci-quality-gate.yml'
 
   # =========================================================================
-  # JOB 1: APPLICATION CODE FUNCTIONAL VALIDATION (RUNS ONLY IF SRC CHANGES)
+  # JOB 1: APPLICATION CODE FUNCTIONAL VALIDATION (RUNS ONLY IF APP CHANGES)
   # =========================================================================
   application-validation:
     name: "Python Quality Engine (Matrix)"
@@ -88,7 +88,7 @@ jobs:
 
 
   # =========================================================================
-  # JOB 2: APPLICATION SECURITY SECTOR - SAST & SCA (RUNS ONLY IF SRC CHANGES)
+  # JOB 2: APPLICATION SECURITY SECTOR - SAST & SCA (RUNS ONLY IF APP CHANGES)
   # =========================================================================
   application-security:
     name: "Django SAST & SCA Guard"
@@ -127,9 +127,9 @@ jobs:
           args: --file=src/requirements.txt --severity-threshold=high -- --allow-missing # Hard fail if any high severity vulnerabilities are found, but allow the scan to run even if the requirements file is missing (e.g., for certain PRs)
 
 
-  # =========================================================================
+  # ==============================================================================
   # JOB 3: VALIDATE INFRASTRUCTURE AS CODE SYNTAX (RUNS ONLY IF INFRA CHANGES)
-  # =========================================================================
+  # ==============================================================================
   infrastructure-validation:
     name: "Terraform Lint & Validate Gate"
     runs-on: ubuntu-latest
