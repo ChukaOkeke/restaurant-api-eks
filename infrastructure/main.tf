@@ -42,6 +42,11 @@ module "security" {
   github_org  = var.github_org
   github_repo = var.github_repo
 
+  # Explicit multi-region mapping authorization
+  providers = {
+    aws           = aws
+    aws.us_east_1 = aws.us_east_1
+  }
 }
 
 
