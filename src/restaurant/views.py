@@ -27,7 +27,7 @@ class MenuItemsView(generics.ListCreateAPIView):
     serializer_class = MenuSerializer  # Serialize the menu items
 
 
-# Class-based view to handle a single Menu item (Synchronous Path)
+# Class-based view to handle a single Menu item (Synchronous Path).
 class SingleMenuItemView(generics.RetrieveUpdateAPIView, generics.DestroyAPIView):
     queryset = MenuItem.objects.all()  # Fetch menu item from the database
     serializer_class = MenuSerializer  # Serialize the menu item
