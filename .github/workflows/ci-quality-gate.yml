@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   # =========================================================================
-  # JOB 0: THE TRAFFIC CONTROLLER (PATH FILTER INSPECTOR)
+  # JOB 0: THE TRAFFIC CONTROLLER (PATH FILTER INSPECTOR.)
   # =========================================================================
   detect-changes:
     name: "Inspect Repository Changes"
