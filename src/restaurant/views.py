@@ -33,7 +33,7 @@ class SingleMenuItemView(generics.RetrieveUpdateAPIView, generics.DestroyAPIView
     serializer_class = MenuSerializer  # Serialize the menu item
 
 
-# Viewset view to handle Bookings (Asynchronous Path)
+# Viewset view to handle Bookings (Asynchronous Path).
 class BookingViewSet(viewsets.ModelViewSet):
     queryset = Booking.objects.all()  # Fetch all bookings from the database
     serializer_class = BookingSerializer  # Serialize the bookings

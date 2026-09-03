@@ -235,7 +235,10 @@ jobs:
     name: Update ArgoCD GitOps State
     runs-on: ubuntu-latest
     needs: [detect-changes, build-scan-push]  # Ensure that the path-filtering and image build/push completes successfully before running this job.
-    if: ${{ needs.detect-changes.outputs.src == 'true' }}
+    if: |
+      always() &&
+      needs.detect-changes.outputs.src == 'true' &&
+      needs.build-scan-push.result == 'success'
     
     steps:
       # CONSTRAINT 2: Checkout target GitOps repository using elevated PAT permissions
