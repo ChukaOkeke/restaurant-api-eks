@@ -5,9 +5,8 @@ terraform {
 
   required_providers {
     aws = {
-      source                = "hashicorp/aws"
-      version               = ">= 6.0.0"
-      configuration_aliases = [aws, aws.us_east_1] # Requires the root to hand over the aliases for both the primary and compliance regions
+      source  = "hashicorp/aws"
+      version = ">= 6.0.0"
     }
   }
 }
