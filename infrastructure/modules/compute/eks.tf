@@ -64,6 +64,12 @@ resource "aws_eks_cluster" "this" {
   #checkov:skip=CKV_AWS_39: Public API endpoint enabled to allow external GitHub Actions CI/CD deployment without complex VPN/Bastion infrastructure overhead.
   #checkov:skip=CKV_AWS_38: Public access CIDR unrestricted to allow dynamic GitHub Actions hosted runners to execute kubectl/Helm deployments.
 
+  # Enable EKS Access Entry API authentication
+  access_config {
+    authentication_mode                         = "API_AND_CONFIG_MAP"
+    bootstrap_cluster_creator_admin_permissions = true
+  }
+
   # VPC configuration for control plane networking
   vpc_config {
     # Subnets where EKS control plane ENIs will be placed (should be private)
