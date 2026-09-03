@@ -10,18 +10,18 @@ resource "aws_iam_openid_connect_provider" "github" {
   thumbprint_list = [data.tls_certificate.github.certificates[0].sha1_fingerprint]
 
   tags = {
-    Name = "asgard-github-oidc-provider"
+    Name = "restaurant-api-${var.environment}-github-oidc-provider"
   }
 }
 
 # 2. THE DEPLOYMENT IAM ROLE (Assumed by GitHub Actions during pipeline runs)
 resource "aws_iam_role" "github_actions" {
-  name               = "asgard-${var.environment}-github-actions-role"
+  name               = "restaurant-api-${var.environment}-github-actions-role"
   description        = "Short-lived access role for GitHub Actions infrastructure deployment workflows"
   assume_role_policy = data.aws_iam_policy_document.github_actions_assume.json
 
   tags = {
-    Name = "asgard-${var.environment}-github-actions-role"
+    Name = "restaurant-api-${var.environment}-github-actions-role"
   }
 }
 
@@ -31,6 +31,6 @@ resource "aws_iam_role_policy_attachment" "terraform_admin" {
   role       = aws_iam_role.github_actions.name
   policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
 
-  # checkov:skip=CKV_AWS_274: AdminAccess is temporarily retained because Terraform must dynamically provision and manage downstream IAM roles (e.g., Lambda execution boundaries). 
+  # checkov:skip=CKV_AWS_274: AdminAccess is temporarily retained because Terraform must dynamically provision and manage downstream IAM roles. 
   # In a strict production environment, this would be replaced with a bounded custom policy generated via AWS IAM Access Analyzer, combined with IAM Permission Boundaries to prevent privilege escalation.
 }
