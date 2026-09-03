@@ -19,17 +19,17 @@ data "aws_iam_policy_document" "github_actions_assume" {
       identifiers = [aws_iam_openid_connect_provider.github.arn]
     }
 
+    # Strict Conditional Safeguards: Lock down access ONLY to your repo and main branch
     condition {
       test     = "StringEquals"
       variable = "token.actions.githubusercontent.com:aud"
       values   = ["sts.amazonaws.com"]
     }
 
-    # Allow all workflow triggers (branches, tags, PRs) for this specific repo
     condition {
       test     = "StringLike"
       variable = "token.actions.githubusercontent.com:sub"
-      values   = ["repo:${var.github_org}/${var.github_repo}:*"]
+      values   = ["repo:${var.github_org}/${var.github_repo}:ref:refs/heads/main"]
     }
   }
 }
