@@ -21,7 +21,7 @@ def index(request):
     return render(request, 'restaurant/index.html')
 
 
-# Class-based view to handle Menu items (Synchronous Path)
+# Class-based view to handle Menu items (Synchronous Path).
 class MenuItemsView(generics.ListCreateAPIView):
     queryset = MenuItem.objects.all()  # Fetch all menu items from the database
     serializer_class = MenuSerializer  # Serialize the menu items
