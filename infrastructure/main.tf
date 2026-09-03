@@ -63,7 +63,11 @@ module "compute" {
   eks_node_security_group_id          = module.endpoints_sg.eks_node_security_group_id
   app_secret_arn                      = module.security.app_secret_arn
   domain_name                         = var.domain_name
+
+  # Local IAM user mapping for kubectl access
+  admin_user_arn = var.admin_user_arn
 }
+
 
 
 # ------------------------------------------------------------------------------

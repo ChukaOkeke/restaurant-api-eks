@@ -11,7 +11,7 @@ from .serializers import MenuSerializer, BookingSerializer
 
 
 # Create your views here.
-# Lightweight unauthenticated health-check endpoint for K8s Probes and AWS ALB
+# Lightweight unauthenticated health-check endpoint for K8s Probes and AWS ALB.
 def healthz(request):
     return JsonResponse({"status": "healthy"}, status=200)
 

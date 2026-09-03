@@ -133,6 +133,12 @@ variable "node_capacity_type" {
   default     = "ON_DEMAND"
 }
 
+variable "admin_user_arn" {
+  type        = string
+  description = "IAM ARN of the local administrator user requiring EKS cluster access"
+  default     = "arn:aws:iam::618339653656:user/iamadmin"
+}
+
 
 # DATABASE CONFIGURATIONS
 variable "db_instance_class" {

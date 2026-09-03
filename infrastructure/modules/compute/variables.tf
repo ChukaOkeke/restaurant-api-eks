@@ -66,3 +66,8 @@ variable "domain_name" {
   type        = string
   description = "Apex domain name registered in Route 53 (e.g., asgardcuisines.link)"
 }
+
+variable "admin_user_arn" {
+  type        = string
+  description = "IAM ARN of the local administrator user requiring EKS cluster access"
+}

@@ -324,3 +324,27 @@ resource "aws_eks_addon" "kube_proxy" {
 
   depends_on = [aws_eks_node_group.system]
 }
+
+
+# ------------------------------------------------------------------------------
+# 6. EKS Access Entries (Granting Local Admin Access to Cluster)
+# ------------------------------------------------------------------------------
+resource "aws_eks_access_entry" "local_admin" {
+  cluster_name  = aws_eks_cluster.this.name
+  principal_arn = var.admin_user_arn
+  type          = "STANDARD"
+
+  tags = {
+    Name = "restaurant-api-${var.environment}-access-entry-local-admin"
+  }
+}
+
+resource "aws_eks_access_policy_association" "local_admin" {
+  cluster_name  = aws_eks_cluster.this.name
+  policy_arn    = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+  principal_arn = aws_eks_access_entry.local_admin.principal_arn
+
+  access_scope {
+    type = "cluster"
+  }
+}
