@@ -31,6 +31,6 @@ resource "aws_iam_role_policy_attachment" "github_actions_admin" {
   role       = aws_iam_role.github_actions.name
   policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
 
-  # checkov:skip=CKV_AWS_274: AdminAccess is temporarily retained because Terraform must dynamically provision and manage downstream IAM roles (e.g., Lambda execution boundaries). 
+  # checkov:skip=CKV_AWS_274: AdminAccess is temporarily retained because Terraform must dynamically provision and manage downstream IAM roles. 
   # In a strict production environment, this would be replaced with a bounded custom policy generated via AWS IAM Access Analyzer, combined with IAM Permission Boundaries to prevent privilege escalation.
 }
