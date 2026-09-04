@@ -18,7 +18,7 @@ resource "aws_secretsmanager_secret" "app_secrets" {
 }
 
 # 2. THE INITIAL KEY SHELL
-# Gives your application schema structure without storing plaintext values in git
+# Gives your application schema structure without storing plaintext values in git.
 resource "aws_secretsmanager_secret_version" "app_secrets_template" {
   secret_id = aws_secretsmanager_secret.app_secrets.id
   secret_string = jsonencode({
