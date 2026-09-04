@@ -56,7 +56,7 @@ class BookingViewSet(viewsets.ModelViewSet):
 
         booking_data = serializer.validated_data
         
-        # Prepare the payload for SQS (converting datetime to ISO string)
+        # Prepare the payload for SQS (converting datetime to ISO string).
         sqs_payload = {
             "name": booking_data.get('name'),
             "no_of_guests": booking_data.get('no_of_guests'),
