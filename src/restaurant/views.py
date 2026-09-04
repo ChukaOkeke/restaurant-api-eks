@@ -64,7 +64,7 @@ class BookingViewSet(viewsets.ModelViewSet):
         }
 
         try:
-            # Native SDK usage — authorization relies on EKS Pod Identity Agent
+            # Native SDK usage — authorization relies on EKS Pod Identity Agent.
             sqs_client = boto3.client('sqs', region_name=os.getenv('AWS_REGION', 'eu-west-1'))
             sqs_client.send_message(
                 QueueUrl=queue_url,
