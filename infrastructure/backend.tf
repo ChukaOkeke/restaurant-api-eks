@@ -1,4 +1,4 @@
-# Configure the S3 backend for remote state management. Variables can't be used, must be hardcoded
+# Configure the S3 backend for remote state management. Variables can't be used, must be hardcoded.
 terraform {
   backend "s3" {
     bucket         = "chuka-devops-state-storage" # The unique bucket name
