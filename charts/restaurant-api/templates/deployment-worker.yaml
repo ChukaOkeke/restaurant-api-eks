@@ -47,6 +47,12 @@ spec:
               value: {{ .Values.env.awsRegion }}
             - name: DJANGO_SETTINGS_MODULE
               value: {{ .Values.env.djangoSettingsModule }}
+            - name: USE_S3
+              value: {{ .Values.env.useS3 | quote }}
+            - name: AWS_STORAGE_BUCKET_NAME
+              value: {{ .Values.env.s3BucketName }}
+            - name: CLOUDFRONT_DOMAIN_NAME
+              value: {{ .Values.env.cloudfrontDomain }}
           resources:
             requests:
               cpu: 100m
