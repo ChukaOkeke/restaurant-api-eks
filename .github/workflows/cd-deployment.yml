@@ -131,19 +131,21 @@ jobs:
         run: |
           ALB_SG=$(terraform -chdir=./infrastructure output -raw alb_security_group_id)
           CERT_ARN=$(terraform -chdir=./infrastructure output -raw alb_certificate_arn)
+          RDS_SECRET_ARN=$(terraform -chdir=./infrastructure output -raw rds_master_secret_arn)
           
           cd gitops-repo/values/production
           
           # Use yq to dynamically inject Terraform outputs into restaurant-api-values.yaml
           yq e -i ".ingress.albSecurityGroup = \"${ALB_SG}\"" restaurant-api-values.yaml
           yq e -i ".ingress.certificateArn = \"${CERT_ARN}\"" restaurant-api-values.yaml
-          
+          yq e -i ".secrets.rdsSecretName = \"${RDS_SECRET_ARN}\"" restaurant-api-values.yaml
+
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add restaurant-api-values.yaml
           
           # Use [skip ci] so this automated commit doesn't recursively trigger another pipeline
-          git commit -m "chore(infra): automated update of ALB SG and ACM Cert ARN [skip ci]" || echo "No changes to commit"
+          git commit -m "chore(infra): automated update of ALB SG, ACM Cert, and RDS Secret ARN [skip ci]" || echo "No changes to commit"
           git push origin main
 
   # ===========================================================================

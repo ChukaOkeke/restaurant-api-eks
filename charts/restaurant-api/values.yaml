@@ -16,6 +16,9 @@ serviceAccount:
 env:
   awsRegion: "eu-west-1"
   djangoSettingsModule: "config.settings"
+  useS3: "False"
+  s3BucketName: ""
+  cloudfrontDomain: ""
 
 # External Secrets Operator configuration
 secrets:

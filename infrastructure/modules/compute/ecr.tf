@@ -6,6 +6,7 @@
 resource "aws_ecr_repository" "app" {
   name                 = "restaurant-api-${var.environment}-app"
   image_tag_mutability = "IMMUTABLE"
+  force_delete         = true # Allows 'terraform destroy' to purge non-empty ECR repos in dev
 
   #checkov:skip=CKV_AWS_136: Standard AWS AES-256 encryption at rest is sufficient for container image artifacts and avoids KMS overhead in dev.
 
