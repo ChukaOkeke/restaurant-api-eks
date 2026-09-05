@@ -18,7 +18,7 @@ env:
   ECR_REPOSITORY: "restaurant-api-dev-app"
   GITOPS_REPO: "ChukaOkeke/restaurant-api-eks-gitops" 
 
-# CRITICAL: These permissions are strictly required for OIDC federation to work
+# CRITICAL: These permissions are strictly required for OIDC federation to work.
 permissions:
   id-token: write # Required for OIDC
   contents: read  # Required for checkout
