@@ -19,6 +19,7 @@ env:
   useS3: "False"
   s3BucketName: ""
   cloudfrontDomain: ""
+  sqsQueueUrl: "https://sqs.eu-west-1.amazonaws.com/618339653656/restaurant-api-dev-queue"
 
 # External Secrets Operator configuration
 secrets:
