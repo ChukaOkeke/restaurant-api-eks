@@ -62,6 +62,10 @@ spec:
               value: {{ .Values.env.s3BucketName }}
             - name: CLOUDFRONT_DOMAIN_NAME
               value: {{ .Values.env.cloudfrontDomain }}
+            - name: DB_HOST
+              value: {{ .Values.config.DB_HOST | quote }}
+            - name: DB_NAME
+              value: {{ .Values.config.DB_NAME | quote }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           # Standard probes to ensure the container is ready to receive traffic
