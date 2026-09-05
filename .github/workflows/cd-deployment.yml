@@ -117,7 +117,7 @@ jobs:
           echo "Syncing images and asset payloads directly to s3://$STATIC_BUCKET/static/..."
           aws s3 sync ../src/restaurant/static/ s3://$STATIC_BUCKET/static/ --delete
 
-      # Checkout external GitOps repo cleanly into a subdirectory
+      # Checkout external GitOps repo cleanly into a subdirectory.
       - name: Checkout GitOps Repository for Infra Updates
         uses: actions/checkout@v4
         with:

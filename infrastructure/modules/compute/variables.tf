@@ -71,3 +71,8 @@ variable "admin_user_arn" {
   type        = string
   description = "IAM ARN of the local administrator user requiring EKS cluster access"
 }
+
+variable "booking_queue_arn" {
+  type        = string
+  description = "ARN of the SQS queue for booking messages"
+}

@@ -331,7 +331,7 @@ resource "aws_iam_policy" "worker_sqs" {
         "sqs:ChangeMessageVisibility",
         "sqs:SendMessage"
       ]
-      Resource = module.messaging.booking_queue_arn
+      Resource = var.booking_queue_arn
     }]
   })
 
