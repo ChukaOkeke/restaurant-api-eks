@@ -289,3 +289,65 @@ resource "aws_eks_pod_identity_association" "external_dns" {
   service_account = "external-dns-sa"
   role_arn        = aws_iam_role.external_dns.arn
 }
+
+
+# ------------------------------------------------------------------------------
+# 7. Worker Pod IAM Role & Pod Identity
+# ------------------------------------------------------------------------------
+resource "aws_iam_role" "worker_sqs" {
+  name = "restaurant-api-${var.environment}-worker-sqs-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Principal = {
+        Service = "pods.eks.amazonaws.com"
+      }
+      Action = [
+        "sts:AssumeRole",
+        "sts:TagSession"
+      ]
+    }]
+  })
+
+  tags = {
+    Name = "restaurant-api-${var.environment}-worker-sqs-role"
+  }
+}
+
+resource "aws_iam_policy" "worker_sqs" {
+  name        = "restaurant-api-${var.environment}-worker-sqs-policy"
+  description = "Allows worker pods to poll and process SQS messages"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Action = [
+        "sqs:ReceiveMessage",
+        "sqs:DeleteMessage",
+        "sqs:GetQueueAttributes",
+        "sqs:ChangeMessageVisibility",
+        "sqs:SendMessage"
+      ]
+      Resource = var.booking_queue_arn
+    }]
+  })
+
+  tags = {
+    Name = "restaurant-api-${var.environment}-worker-sqs-policy"
+  }
+}
+
+resource "aws_iam_role_policy_attachment" "worker_sqs" {
+  role       = aws_iam_role.worker_sqs.name
+  policy_arn = aws_iam_policy.worker_sqs.arn
+}
+
+resource "aws_eks_pod_identity_association" "worker_sqs" {
+  cluster_name    = aws_eks_cluster.this.name
+  namespace       = "restaurant-api"
+  service_account = "restaurant-api-worker-sa"
+  role_arn        = aws_iam_role.worker_sqs.arn
+}

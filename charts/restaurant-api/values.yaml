@@ -11,6 +11,7 @@ image:
 serviceAccount:
   create: true
   name: "restaurant-api-sa"
+  workerName: "restaurant-api-worker-sa"
   # EKS Pod Identities handle the IAM mapping, so no OIDC annotations are needed here
 
 env:
