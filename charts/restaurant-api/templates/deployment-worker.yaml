@@ -21,7 +21,7 @@ spec:
         app.kubernetes.io/name: {{ .Chart.Name }}
         app.kubernetes.io/component: worker
     spec:
-      serviceAccountName: {{ .Values.serviceAccount.name }}
+      serviceAccountName: {{ .Values.serviceAccount.workerName }}
       # Enforces that the pod/container runs as a non-root user for security
       securityContext:
         runAsNonRoot: true

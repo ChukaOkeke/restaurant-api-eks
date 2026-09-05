@@ -132,7 +132,8 @@ jobs:
           ALB_SG=$(terraform -chdir=./infrastructure output -raw alb_security_group_id)
           CERT_ARN=$(terraform -chdir=./infrastructure output -raw alb_certificate_arn)
           RDS_SECRET_ARN=$(terraform -chdir=./infrastructure output -raw rds_master_secret_arn)
-          RDS_ENDPOINT=$(terraform -chdir=./infrastructure output -raw rds_endpoint)
+          # Extract hostname only by stripping :5432 port suffix
+          RDS_ENDPOINT=$(terraform -chdir=./infrastructure output -raw rds_endpoint | cut -d':' -f1)
           SQS_QUEUE_URL=$(terraform -chdir=./infrastructure output -raw sqs_booking_queue_url)
           
           cd gitops-repo/values/production
