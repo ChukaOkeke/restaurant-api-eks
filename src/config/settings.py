@@ -157,6 +157,7 @@ STATICFILES_DIRS = []
 if os.getenv('USE_S3', 'False') == 'True':
     AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
     AWS_S3_CUSTOM_DOMAIN = os.getenv('CLOUDFRONT_DOMAIN_NAME') # e.g., asgardcuisines.link
+    AWS_LOCATION = 'static'  # Instructs django-storages to prepend /static/ to generated URLs
     
     AWS_S3_OBJECT_PARAMETERS = {
         'CacheControl': 'max-age=86400',
