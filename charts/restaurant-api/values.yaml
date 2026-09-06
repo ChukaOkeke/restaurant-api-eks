@@ -18,8 +18,8 @@ env:
   awsRegion: "eu-west-1"
   djangoSettingsModule: "config.settings"
   useS3: "False"
-  s3BucketName: ""
-  cloudfrontDomain: ""
+  s3BucketName: "restaurant-api-dev-static-assets-618339653656"
+  cloudfrontDomain: "asgardcuisines.link"
   sqsQueueUrl: "https://sqs.eu-west-1.amazonaws.com/618339653656/restaurant-api-dev-queue"
 
 # External Secrets Operator configuration
