@@ -76,3 +76,8 @@ variable "booking_queue_arn" {
   type        = string
   description = "ARN of the SQS queue for booking messages"
 }
+
+variable "s3_static_bucket_arn" {
+  type        = string
+  description = "ARN of the S3 bucket for static assets"
+}
