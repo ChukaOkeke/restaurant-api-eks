@@ -2,7 +2,7 @@ from django.urls import path
 from . import views
 from rest_framework.authtoken.views import obtain_auth_token
 
-# Define URL routes for the restaurant app
+# Define URL routes for the restaurant app..
 urlpatterns = [
     path('', views.index, name='index'),         # Route for the homepage
     path('healthz', views.healthz, name='healthz'),  # Route for K8s / ALB probes
