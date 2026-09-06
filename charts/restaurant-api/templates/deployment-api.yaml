@@ -64,6 +64,8 @@ spec:
               value: {{ .Values.env.cloudfrontDomain }}
             - name: RUN_MIGRATIONS
               value: "true"
+            - name: COLLECT_STATIC
+              value: "true"
             - name: DB_HOST
               value: {{ .Values.config.DB_HOST | quote }}
             - name: DB_NAME
