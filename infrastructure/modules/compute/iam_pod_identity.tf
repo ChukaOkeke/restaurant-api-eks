@@ -354,7 +354,7 @@ resource "aws_eks_pod_identity_association" "worker_sqs" {
 
 
 # ------------------------------------------------------------------------------
-# 7. Restaurant API Pod IAM Role & Pod Identity
+# 7. Restaurant API Pod IAM Role & Pod Identity.
 # ------------------------------------------------------------------------------
 resource "aws_iam_role" "api_s3" {
   name = "restaurant-api-${var.environment}-api-s3-role"
