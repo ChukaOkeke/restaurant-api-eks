@@ -351,3 +351,67 @@ resource "aws_eks_pod_identity_association" "worker_sqs" {
   service_account = "restaurant-api-worker-sa"
   role_arn        = aws_iam_role.worker_sqs.arn
 }
+
+
+# ------------------------------------------------------------------------------
+# 7. Restaurant API Pod IAM Role & Pod Identity
+# ------------------------------------------------------------------------------
+resource "aws_iam_role" "api_s3" {
+  name = "restaurant-api-${var.environment}-api-s3-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Principal = {
+        Service = "pods.eks.amazonaws.com"
+      }
+      Action = [
+        "sts:AssumeRole",
+        "sts:TagSession"
+      ]
+    }]
+  })
+
+  tags = {
+    Name = "restaurant-api-${var.environment}-api-s3-role"
+  }
+}
+
+resource "aws_iam_policy" "api_s3" {
+  name        = "restaurant-api-${var.environment}-api-s3-policy"
+  description = "Allows API pods to collect static assets and upload media to S3"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Action = [
+        "s3:PutObject",
+        "s3:GetObject",
+        "s3:DeleteObject",
+        "s3:ListBucket"
+      ]
+      Resource = [
+        var.s3_static_bucket_arn,
+        "${var.s3_static_bucket_arn}/*"
+      ]
+    }]
+  })
+
+  tags = {
+    Name = "restaurant-api-${var.environment}-api-s3-policy"
+  }
+}
+
+resource "aws_iam_role_policy_attachment" "api_s3" {
+  role       = aws_iam_role.api_s3.name
+  policy_arn = aws_iam_policy.api_s3.arn
+}
+
+resource "aws_eks_pod_identity_association" "api_s3" {
+  cluster_name    = aws_eks_cluster.this.name
+  namespace       = "restaurant-api"
+  service_account = "restaurant-api-sa"
+  role_arn        = aws_iam_role.api_s3.arn
+}
