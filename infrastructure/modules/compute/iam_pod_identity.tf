@@ -292,7 +292,7 @@ resource "aws_eks_pod_identity_association" "external_dns" {
 
 
 # ------------------------------------------------------------------------------
-# 7. Worker Pod IAM Role & Pod Identity
+# 7. Worker Pod IAM Role & Pod Identity.
 # ------------------------------------------------------------------------------
 resource "aws_iam_role" "worker_sqs" {
   name = "restaurant-api-${var.environment}-worker-sqs-role"
