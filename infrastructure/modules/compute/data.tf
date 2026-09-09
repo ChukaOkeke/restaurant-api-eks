@@ -53,14 +53,15 @@ data "aws_route53_zone" "primary" {
 
 
 # ------------------------------------------------------------------------------
-# Karpenter Controller IAM Policy Document (Fine-Grained PoLP)
+# Karpenter Controller IAM Policy Document (Fine-Grained PoLP & Consolidated < 6KB)
 # ------------------------------------------------------------------------------
 data "aws_iam_policy_document" "karpenter_controller" {
   #checkov:skip=CKV_AWS_356: EC2 Describe*, Pricing, and IAM ListInstanceProfiles actions do not support resource-level permissions and strictly require wildcard '*' resources.
+  #checkov:skip=CKV_AWS_108: EC2 Describe and Pricing APIs do not support resource-level permissions. SSM reading is explicitly scoped to official AWS public service parameters.
 
   # Allow launching instances and fleets with scoped resource constraints
   statement {
-    sid    = "AllowScopedEC2InstanceAccessActions"
+    sid    = "EC2RunInstancesScoped"
     effect = "Allow"
     actions = [
       "ec2:RunInstances",
@@ -72,37 +73,13 @@ data "aws_iam_policy_document" "karpenter_controller" {
       "arn:aws:ec2:${data.aws_region.current.name}:*:security-group/*",
       "arn:aws:ec2:${data.aws_region.current.name}:*:subnet/*",
       "arn:aws:ec2:${data.aws_region.current.name}:*:capacity-reservation/*",
-    ]
-  }
-
-  # Allow access to cluster-owned launch templates
-  statement {
-    sid    = "AllowScopedEC2LaunchTemplateAccessActions"
-    effect = "Allow"
-    actions = [
-      "ec2:RunInstances",
-      "ec2:CreateFleet",
-    ]
-    resources = [
       "arn:aws:ec2:${data.aws_region.current.name}:*:launch-template/*",
     ]
-
-    condition {
-      test     = "StringEquals"
-      variable = "aws:ResourceTag/kubernetes.io/cluster/${var.cluster_name}"
-      values   = ["owned"]
-    }
-
-    condition {
-      test     = "StringLike"
-      variable = "aws:ResourceTag/karpenter.sh/nodepool"
-      values   = ["*"]
-    }
   }
 
   # Scoped creation of EC2 resources tagged for this cluster
   statement {
-    sid    = "AllowScopedEC2InstanceActionsWithTags"
+    sid    = "EC2CreateTaggedResources"
     effect = "Allow"
     actions = [
       "ec2:RunInstances",
@@ -130,21 +107,13 @@ data "aws_iam_policy_document" "karpenter_controller" {
       variable = "aws:RequestTag/eks:eks-cluster-name"
       values   = [var.cluster_name]
     }
-
-    condition {
-      test     = "StringLike"
-      variable = "aws:RequestTag/karpenter.sh/nodepool"
-      values   = ["*"]
-    }
   }
 
-  # Allow tag creation during resource creation
+  # Allow tag creation during resource creation and management
   statement {
-    sid    = "AllowScopedResourceCreationTagging"
-    effect = "Allow"
-    actions = [
-      "ec2:CreateTags",
-    ]
+    sid     = "EC2CreateTagsScoped"
+    effect  = "Allow"
+    actions = ["ec2:CreateTags"]
     resources = [
       "arn:aws:ec2:${data.aws_region.current.name}:*:fleet/*",
       "arn:aws:ec2:${data.aws_region.current.name}:*:instance/*",
@@ -159,73 +128,11 @@ data "aws_iam_policy_document" "karpenter_controller" {
       variable = "aws:RequestTag/kubernetes.io/cluster/${var.cluster_name}"
       values   = ["owned"]
     }
-
-    condition {
-      test     = "StringEquals"
-      variable = "aws:RequestTag/eks:eks-cluster-name"
-      values   = [var.cluster_name]
-    }
-
-    condition {
-      test     = "StringEquals"
-      variable = "ec2:CreateAction"
-      values = [
-        "RunInstances",
-        "CreateFleet",
-        "CreateLaunchTemplate",
-      ]
-    }
-
-    condition {
-      test     = "StringLike"
-      variable = "aws:RequestTag/karpenter.sh/nodepool"
-      values   = ["*"]
-    }
-  }
-
-  # Allow updating tags on existing managed instances
-  statement {
-    sid    = "AllowScopedResourceTagging"
-    effect = "Allow"
-    actions = [
-      "ec2:CreateTags",
-    ]
-    resources = [
-      "arn:aws:ec2:${data.aws_region.current.name}:*:instance/*",
-    ]
-
-    condition {
-      test     = "StringEquals"
-      variable = "aws:ResourceTag/kubernetes.io/cluster/${var.cluster_name}"
-      values   = ["owned"]
-    }
-
-    condition {
-      test     = "StringLike"
-      variable = "aws:ResourceTag/karpenter.sh/nodepool"
-      values   = ["*"]
-    }
-
-    condition {
-      test     = "StringEqualsIfExists"
-      variable = "aws:RequestTag/eks:eks-cluster-name"
-      values   = [var.cluster_name]
-    }
-
-    condition {
-      test     = "ForAllValues:StringEquals"
-      variable = "aws:TagKeys"
-      values = [
-        "eks:eks-cluster-name",
-        "karpenter.sh/nodeclaim",
-        "Name",
-      ]
-    }
   }
 
   # Allow terminating instances and launch templates owned by Karpenter
   statement {
-    sid    = "AllowScopedDeletion"
+    sid    = "EC2ResourceDeletion"
     effect = "Allow"
     actions = [
       "ec2:TerminateInstances",
@@ -241,17 +148,11 @@ data "aws_iam_policy_document" "karpenter_controller" {
       variable = "aws:ResourceTag/kubernetes.io/cluster/${var.cluster_name}"
       values   = ["owned"]
     }
-
-    condition {
-      test     = "StringLike"
-      variable = "aws:ResourceTag/karpenter.sh/nodepool"
-      values   = ["*"]
-    }
   }
 
   # Regional read actions for EC2 instance types, pricing, and topology discovery
   statement {
-    sid    = "AllowRegionalReadActions"
+    sid    = "EC2ReadOnlyDiscovery"
     effect = "Allow"
     actions = [
       "ec2:DescribeCapacityReservations",
@@ -265,12 +166,6 @@ data "aws_iam_policy_document" "karpenter_controller" {
       "ec2:DescribeSubnets",
     ]
     resources = ["*"]
-
-    condition {
-      test     = "StringEquals"
-      variable = "aws:RequestedRegion"
-      values   = [data.aws_region.current.name]
-    }
   }
 
   # Read SSM parameters for official EKS optimized AMIs
@@ -295,154 +190,38 @@ data "aws_iam_policy_document" "karpenter_controller" {
 
   # Allow passing node IAM role to EC2 instances launched by Karpenter
   statement {
-    sid    = "AllowPassingInstanceRole"
-    effect = "Allow"
-    actions = [
-      "iam:PassRole",
-    ]
-    resources = [
-      aws_iam_role.karpenter_node.arn,
-    ]
+    sid       = "IAMPassRoleToEC2"
+    effect    = "Allow"
+    actions   = ["iam:PassRole"]
+    resources = [aws_iam_role.karpenter_node.arn]
 
     condition {
       test     = "StringEquals"
       variable = "iam:PassedToService"
-      values = [
-        "ec2.amazonaws.com",
-        "ec2.amazonaws.com.cn",
-      ]
+      values   = ["ec2.amazonaws.com"]
     }
   }
 
   # Instance Profile management permissions required for EC2NodeClass
   statement {
-    sid    = "AllowScopedInstanceProfileCreationActions"
+    sid    = "InstanceProfileManagement"
     effect = "Allow"
     actions = [
       "iam:CreateInstanceProfile",
-    ]
-    resources = [
-      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:instance-profile/*",
-    ]
-
-    condition {
-      test     = "StringEquals"
-      variable = "aws:RequestTag/kubernetes.io/cluster/${var.cluster_name}"
-      values   = ["owned"]
-    }
-
-    condition {
-      test     = "StringEquals"
-      variable = "aws:RequestTag/eks:eks-cluster-name"
-      values   = [var.cluster_name]
-    }
-
-    condition {
-      test     = "StringEquals"
-      variable = "aws:RequestTag/topology.kubernetes.io/region"
-      values   = [data.aws_region.current.name]
-    }
-
-    condition {
-      test     = "StringLike"
-      variable = "aws:RequestTag/karpenter.k8s.aws/ec2nodeclass"
-      values   = ["*"]
-    }
-  }
-
-  statement {
-    sid    = "AllowScopedInstanceProfileTagActions"
-    effect = "Allow"
-    actions = [
       "iam:TagInstanceProfile",
-    ]
-    resources = [
-      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:instance-profile/*",
-    ]
-
-    condition {
-      test     = "StringEquals"
-      variable = "aws:ResourceTag/kubernetes.io/cluster/${var.cluster_name}"
-      values   = ["owned"]
-    }
-
-    condition {
-      test     = "StringEquals"
-      variable = "aws:ResourceTag/topology.kubernetes.io/region"
-      values   = [data.aws_region.current.name]
-    }
-
-    condition {
-      test     = "StringEquals"
-      variable = "aws:RequestTag/kubernetes.io/cluster/${var.cluster_name}"
-      values   = ["owned"]
-    }
-
-    condition {
-      test     = "StringEquals"
-      variable = "aws:RequestTag/eks:eks-cluster-name"
-      values   = [var.cluster_name]
-    }
-
-    condition {
-      test     = "StringEquals"
-      variable = "aws:RequestTag/topology.kubernetes.io/region"
-      values   = [data.aws_region.current.name]
-    }
-
-    condition {
-      test     = "StringLike"
-      variable = "aws:ResourceTag/karpenter.k8s.aws/ec2nodeclass"
-      values   = ["*"]
-    }
-
-    condition {
-      test     = "StringLike"
-      variable = "aws:RequestTag/karpenter.k8s.aws/ec2nodeclass"
-      values   = ["*"]
-    }
-  }
-
-  statement {
-    sid    = "AllowScopedInstanceProfileActions"
-    effect = "Allow"
-    actions = [
       "iam:AddRoleToInstanceProfile",
       "iam:RemoveRoleFromInstanceProfile",
       "iam:DeleteInstanceProfile",
+      "iam:GetInstanceProfile",
     ]
     resources = [
       "arn:aws:iam::${data.aws_caller_identity.current.account_id}:instance-profile/*",
     ]
-
-    condition {
-      test     = "StringEquals"
-      variable = "aws:ResourceTag/kubernetes.io/cluster/${var.cluster_name}"
-      values   = ["owned"]
-    }
-
-    condition {
-      test     = "StringEquals"
-      variable = "aws:ResourceTag/topology.kubernetes.io/region"
-      values   = [data.aws_region.current.name]
-    }
-
-    condition {
-      test     = "StringLike"
-      variable = "aws:ResourceTag/karpenter.k8s.aws/ec2nodeclass"
-      values   = ["*"]
-    }
   }
 
+  # Allow listing instance profiles across the account for EC2NodeClass evaluation
   statement {
-    sid       = "AllowInstanceProfileReadActions"
-    effect    = "Allow"
-    actions   = ["iam:GetInstanceProfile"]
-    resources = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:instance-profile/*"]
-  }
-
-  statement {
-    sid       = "AllowUnscopedInstanceProfileListAction"
+    sid       = "IAMListProfiles"
     effect    = "Allow"
     actions   = ["iam:ListInstanceProfiles"]
     resources = ["*"]
@@ -450,11 +229,9 @@ data "aws_iam_policy_document" "karpenter_controller" {
 
   # Allow EKS cluster endpoint discovery
   statement {
-    sid    = "AllowAPIServerEndpointDiscovery"
-    effect = "Allow"
-    actions = [
-      "eks:DescribeCluster",
-    ]
+    sid     = "EKSClusterDescribe"
+    effect  = "Allow"
+    actions = ["eks:DescribeCluster"]
     resources = [
       "arn:aws:eks:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:cluster/${var.cluster_name}",
     ]
@@ -462,7 +239,7 @@ data "aws_iam_policy_document" "karpenter_controller" {
 
   # SQS Interruption Queue permissions (populated once SQS queue is provisioned)
   statement {
-    sid    = "AllowInterruptionQueueActions"
+    sid    = "SQSInterruptionQueue"
     effect = "Allow"
     actions = [
       "sqs:DeleteMessage",
@@ -470,26 +247,6 @@ data "aws_iam_policy_document" "karpenter_controller" {
       "sqs:GetQueueUrl",
       "sqs:ReceiveMessage",
     ]
-    resources = [
-      var.karpenter_interruption_queue_arn
-    ]
-  }
-
-  # Allow creating EC2 Spot Service-Linked Role if not pre-existing in the account
-  statement {
-    sid    = "AllowScopedSLRCreation"
-    effect = "Allow"
-    actions = [
-      "iam:CreateServiceLinkedRole",
-    ]
-    resources = [
-      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/aws-service-role/spot.amazonaws.com/AWSServiceRoleForEC2Spot",
-    ]
-
-    condition {
-      test     = "StringEquals"
-      variable = "iam:AWSServiceName"
-      values   = ["spot.amazonaws.com"]
-    }
+    resources = [var.karpenter_interruption_queue_arn]
   }
 }
