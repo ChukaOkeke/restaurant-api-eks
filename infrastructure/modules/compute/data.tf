@@ -474,4 +474,22 @@ data "aws_iam_policy_document" "karpenter_controller" {
       var.karpenter_interruption_queue_arn
     ]
   }
+
+  # Allow creating EC2 Spot Service-Linked Role if not pre-existing in the account
+  statement {
+    sid    = "AllowScopedSLRCreation"
+    effect = "Allow"
+    actions = [
+      "iam:CreateServiceLinkedRole",
+    ]
+    resources = [
+      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/aws-service-role/spot.amazonaws.com/AWSServiceRoleForEC2Spot",
+    ]
+
+    condition {
+      test     = "StringEquals"
+      variable = "iam:AWSServiceName"
+      values   = ["spot.amazonaws.com"]
+    }
+  }
 }
