@@ -70,7 +70,7 @@ resource "aws_iam_role_policy_attachment" "karpenter_controller" {
 
 resource "aws_eks_pod_identity_association" "karpenter" {
   cluster_name    = aws_eks_cluster.this.name
-  namespace       = "karpenter"
+  namespace       = "kube-system"
   service_account = "karpenter-sa"
   role_arn        = aws_iam_role.karpenter_controller.arn
 }
@@ -146,7 +146,7 @@ resource "aws_iam_role_policy_attachment" "adot_cloudwatch" {
 
 resource "aws_eks_pod_identity_association" "adot" {
   cluster_name    = aws_eks_cluster.this.name
-  namespace       = "monitoring"
+  namespace       = "opentelemetry"
   service_account = "adot-collector-sa"
   role_arn        = aws_iam_role.adot.arn
 }
