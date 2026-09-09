@@ -81,3 +81,8 @@ variable "s3_static_bucket_arn" {
   type        = string
   description = "ARN of the S3 bucket for static assets"
 }
+
+variable "karpenter_interruption_queue_arn" {
+  type        = string
+  description = "ARN of the SQS queue created in messaging module for Karpenter node interruptions"
+}

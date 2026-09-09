@@ -65,6 +65,7 @@ module "compute" {
   domain_name                         = var.domain_name
   booking_queue_arn                   = module.messaging.booking_queue_arn
   s3_static_bucket_arn                = module.storage.s3_static_bucket_arn
+  karpenter_interruption_queue_arn    = module.messaging.karpenter_interruption_queue_arn
 
   # Local IAM user mapping for kubectl access
   admin_user_arn = var.admin_user_arn
