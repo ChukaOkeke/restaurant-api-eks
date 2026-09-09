@@ -51,26 +51,12 @@ resource "aws_iam_role" "karpenter_controller" {
 
 resource "aws_iam_policy" "karpenter_controller" {
   name        = "restaurant-api-${var.environment}-karpenter-controller-policy"
-  description = "Allows Karpenter controller to discover and provision EC2 instances"
+  description = "Allows Karpenter controller to discover, provision, and terminate EC2 instances safely"
+  policy      = data.aws_iam_policy_document.karpenter_controller.json
 
   #checkov:skip=CKV_AWS_290: Karpenter requires wildcard EC2 write access to dynamically provision compute nodes and launch templates on-demand.
   #checkov:skip=CKV_AWS_355: Dynamic EC2 resource creation APIs cannot be scoped to explicit resource ARNs prior to instance launch.
 
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect   = "Allow"
-        Action   = ["ec2:CreateFleet", "ec2:RunInstances", "ec2:CreateLaunchTemplate", "ec2:DeleteLaunchTemplate", "ec2:Describe*"]
-        Resource = "*"
-      },
-      {
-        Effect   = "Allow"
-        Action   = "iam:PassRole"
-        Resource = aws_iam_role.node_group.arn
-      }
-    ]
-  })
 
   tags = {
     Name = "restaurant-api-${var.environment}-karpenter-controller-policy"

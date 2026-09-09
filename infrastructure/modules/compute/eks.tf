@@ -354,3 +354,18 @@ resource "aws_eks_access_policy_association" "local_admin" {
     type = "cluster"
   }
 }
+
+
+# ------------------------------------------------------------------------------
+# EKS Access Entry for Karpenter Nodes
+# Grants kubelet permission on Karpenter instances to join the cluster
+# ------------------------------------------------------------------------------
+resource "aws_eks_access_entry" "karpenter_node_access" {
+  cluster_name  = aws_eks_cluster.this.name
+  principal_arn = aws_iam_role.karpenter_node.arn
+  type          = "EC2_LINUX"
+
+  tags = {
+    Name = "restaurant-api-${var.environment}-access-entry-karpenter-nodes"
+  }
+}
