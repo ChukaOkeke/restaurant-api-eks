@@ -53,10 +53,11 @@ data "aws_route53_zone" "primary" {
 
 
 # ------------------------------------------------------------------------------
-# Karpenter Controller IAM Policy Document (Fine-Grained PoLP ))
+# Karpenter Controller IAM Policy Document (Fine-Grained PoLP & Consolidated < 6KB)
 # ------------------------------------------------------------------------------
 data "aws_iam_policy_document" "karpenter_controller" {
   #checkov:skip=CKV_AWS_356: EC2 Describe*, Pricing, and IAM ListInstanceProfiles actions do not support resource-level permissions and strictly require wildcard '*' resources.
+  #checkov:skip=CKV_AWS_108: EC2 Describe and Pricing APIs do not support resource-level permissions. SSM reading is explicitly scoped to official AWS public service parameters.
 
   # Allow launching instances and fleets with scoped resource constraints
   statement {
@@ -167,11 +168,23 @@ data "aws_iam_policy_document" "karpenter_controller" {
     resources = ["*"]
   }
 
-  # Read SSM parameters for official EKS optimized AMIs and global EC2 instance pricing data
+  # Read SSM parameters for official EKS optimized AMIs
   statement {
-    sid       = "SSMAndPricingRead"
+    sid    = "AllowSSMReadActions"
+    effect = "Allow"
+    actions = [
+      "ssm:GetParameter",
+    ]
+    resources = [
+      "arn:aws:ssm:${data.aws_region.current.name}::parameter/aws/service/*",
+    ]
+  }
+
+  # Allow querying global EC2 instance pricing data
+  statement {
+    sid       = "AllowPricingReadActions"
     effect    = "Allow"
-    actions   = ["ssm:GetParameter", "pricing:GetProducts"]
+    actions   = ["pricing:GetProducts"]
     resources = ["*"]
   }
 
