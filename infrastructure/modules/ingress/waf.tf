@@ -20,7 +20,7 @@ resource "aws_wafv2_web_acl" "cloudfront_waf" {
     name     = "IPRateLimit"
     priority = 1
     action {
-      block {}
+      count {} # Switched from block {} to allow load test traffic through
     }
 
     statement {
@@ -36,6 +36,8 @@ resource "aws_wafv2_web_acl" "cloudfront_waf" {
       sampled_requests_enabled   = true
     }
   }
+
+
 
   visibility_config {
     cloudwatch_metrics_enabled = true
