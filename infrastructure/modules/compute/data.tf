@@ -56,6 +56,7 @@ data "aws_route53_zone" "primary" {
 # Karpenter Controller IAM Policy Document (Fine-Grained PoLP)
 # ------------------------------------------------------------------------------
 data "aws_iam_policy_document" "karpenter_controller" {
+  #checkov:skip=CKV_AWS_356: EC2 Describe*, Pricing, and IAM ListInstanceProfiles actions do not support resource-level permissions and strictly require wildcard '*' resources.
 
   # Allow launching instances and fleets with scoped resource constraints
   statement {
