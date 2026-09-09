@@ -5,8 +5,8 @@ export const options = {
   stages: [
     // Stage 1: Spike traffic to breach CPU threshold & trigger HPA (0 -> 800 VUs)
     { duration: '30s', target: 800 },
-    // Stage 2: Sustain high traffic to exceed node capacity & trigger Karpenter (800 VUs)
-    { duration: '3m', target: 800 },
+    // Stage 2: Sustain high traffic to exceed node capacity & trigger Karpenter (1000 VUs)
+    { duration: '7m', target: 1000 },
     // Stage 3: Drop traffic to 0 to trigger scale-down & consolidation
     { duration: '30s', target: 0 },
   ],
