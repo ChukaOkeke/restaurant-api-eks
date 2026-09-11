@@ -126,7 +126,7 @@ jobs:
           ref: main
           path: gitops-repo
 
-      # CONSTRAINT 3: Update GitOps repo with Terraform outputs (ALB SG, ACM Cert, RDS Secret ARN, RDS Endpoint, and SQS Queue URL) using elevated PAT permissions and -chdir to avoid path collisions.
+      # CONSTRAINT 3: Update GitOps repo with Terraform outputs (ALB SG, ACM Cert, RDS Secret ARN, RDS Endpoint, and SQS Queue URL) using elevated PAT permissions and -chdir to avoid path collisions
       - name: Update GitOps Repository with Infra Outputs
         run: |
           ALB_SG=$(terraform -chdir=./infrastructure output -raw alb_security_group_id)
