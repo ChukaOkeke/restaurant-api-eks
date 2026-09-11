@@ -134,14 +134,75 @@ resource "aws_iam_role" "adot" {
   }
 }
 
-resource "aws_iam_role_policy_attachment" "adot_prometheus" {
-  policy_arn = "arn:aws:iam::aws:policy/AmazonPrometheusRemoteWriteAccess"
-  role       = aws_iam_role.adot.name
+resource "aws_iam_policy" "adot" {
+  name        = "restaurant-api-${var.environment}-adot-policy"
+  description = "Fine-grained PoLP IAM policy for ADOT Collector (AMP Remote Write, CloudWatch Logs, and X-Ray Traces)"
+
+  #checkov:skip=CKV_AWS_355: X-Ray APIs and CloudWatch PutMetricData do not support resource-level permissions and require wildcard '*' by AWS design.
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      # 1. AMP Remote Write (Scoped to specific Prometheus Workspace)
+      {
+        Sid    = "AMPRemoteWriteScoped"
+        Effect = "Allow"
+        Action = [
+          "aps:RemoteWrite",
+          "aps:GetSeries",
+          "aps:GetLabels",
+          "aps:GetMetricMetadata"
+        ]
+        Resource = [
+          var.prometheus_workspace_arn,
+          "${var.prometheus_workspace_arn}/*"
+        ]
+      },
+      # 2. CloudWatch Logs (Scoped to specific Log Group)
+      {
+        Sid    = "CloudWatchLogsWriteScoped"
+        Effect = "Allow"
+        Action = [
+          "logs:CreateLogStream",
+          "logs:PutLogEvents",
+          "logs:DescribeLogStreams"
+        ]
+        Resource = [
+          var.cloudwatch_log_group_arn,
+          "${var.cloudwatch_log_group_arn}:*"
+        ]
+      },
+      # 3. CloudWatch Custom Metric Publishing
+      {
+        Sid      = "CloudWatchPutMetrics"
+        Effect   = "Allow"
+        Action   = ["cloudwatch:PutMetricData"]
+        Resource = "*"
+      },
+      # 4. AWS X-Ray Trace Ingestion
+      {
+        Sid    = "XRayTraceIngestion"
+        Effect = "Allow"
+        Action = [
+          "xray:PutTraceSegments",
+          "xray:PutTelemetryRecords",
+          "xray:GetSamplingRules",
+          "xray:GetSamplingTargets",
+          "xray:GetSamplingStatisticSummaries"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+
+  tags = {
+    Name = "restaurant-api-${var.environment}-adot-policy"
+  }
 }
 
-resource "aws_iam_role_policy_attachment" "adot_cloudwatch" {
-  policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
+resource "aws_iam_role_policy_attachment" "adot" {
   role       = aws_iam_role.adot.name
+  policy_arn = aws_iam_policy.adot.arn
 }
 
 resource "aws_eks_pod_identity_association" "adot" {

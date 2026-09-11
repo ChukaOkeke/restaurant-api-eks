@@ -196,3 +196,11 @@ variable "receive_wait_time_seconds" {
   default     = 20
   description = "The duration (in seconds) for which the ReceiveMessage action waits for a message to arrive in the queue before returning. This enables long polling."
 }
+
+
+# OBSERVABILITY CONFIGURATIONS
+variable "log_retention_in_days" {
+  type        = number
+  default     = 14
+  description = "Default CloudWatch log retention duration"
+}

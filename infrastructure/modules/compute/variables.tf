@@ -86,3 +86,13 @@ variable "karpenter_interruption_queue_arn" {
   type        = string
   description = "ARN of the SQS queue created in messaging module for Karpenter node interruptions"
 }
+
+variable "prometheus_workspace_arn" {
+  type        = string
+  description = "ARN of the AMP workspace for ADOT Remote Write"
+}
+
+variable "cloudwatch_log_group_arn" {
+  type        = string
+  description = "ARN of the CloudWatch Log Group for ADOT Collector logs"
+}
