@@ -37,12 +37,3 @@ output "grafana_workspace_endpoint" {
   value       = aws_grafana_workspace.this.endpoint
   description = "HTTPS URL endpoint to access the Grafana UI"
 }
-
-output "adot_policy_arns" {
-  value = [
-    aws_iam_policy.adot_amp_write.arn,
-    aws_iam_policy.adot_cw_logs.arn,
-    aws_iam_policy.adot_xray_write.arn
-  ]
-  description = "List of IAM Policy ARNs required by the ADOT Collector IAM Pod Identity Role"
-}

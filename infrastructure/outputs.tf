@@ -167,8 +167,3 @@ output "grafana_workspace_endpoint" {
   value       = module.observability.grafana_workspace_endpoint
   description = "Amazon Managed Grafana URL"
 }
-
-output "adot_policy_arns" {
-  value       = module.observability.adot_policy_arns
-  description = "ARNs of policies required for ADOT IAM Pod Identity association"
-}
