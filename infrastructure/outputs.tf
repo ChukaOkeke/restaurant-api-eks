@@ -152,3 +152,18 @@ output "waf_acl_arn" {
   description = "ARN of the CloudFront WAF Web ACL"
   value       = module.ingress.waf_web_acl_arn
 }
+
+
+# ------------------------------------------------------------------------------
+# Observability layer Outputs
+# ------------------------------------------------------------------------------
+
+output "amp_prometheus_endpoint" {
+  value       = module.observability.amp_workspace_endpoint
+  description = "Amazon Managed Prometheus remote write endpoint URL"
+}
+
+output "grafana_workspace_endpoint" {
+  value       = module.observability.grafana_workspace_endpoint
+  description = "Amazon Managed Grafana URL"
+}

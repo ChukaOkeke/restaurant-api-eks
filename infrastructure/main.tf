@@ -66,6 +66,8 @@ module "compute" {
   booking_queue_arn                   = module.messaging.booking_queue_arn
   s3_static_bucket_arn                = module.storage.s3_static_bucket_arn
   karpenter_interruption_queue_arn    = module.messaging.karpenter_interruption_queue_arn
+  prometheus_workspace_arn            = module.observability.prometheus_workspace_arn
+  cloudwatch_log_group_arn            = module.observability.cloudwatch_log_group_arn
 
   # Local IAM user mapping for kubectl access
   admin_user_arn = var.admin_user_arn
@@ -132,4 +134,18 @@ module "ingress" {
   static_bucket_arn                  = module.storage.s3_static_bucket_arn
   static_bucket_id                   = module.storage.s3_static_bucket_id
   static_bucket_regional_domain_name = module.storage.s3_bucket_regional_domain_name
+}
+
+
+# ==============================================================================
+# Module 9: Observability (Prometheus, Grafana, CloudWatch)
+# ==============================================================================
+
+module "observability" {
+  source = "./modules/observability"
+
+  cluster_name          = var.cluster_name
+  environment           = var.environment
+  aws_region            = var.aws_primary_region
+  log_retention_in_days = var.log_retention_in_days
 }
