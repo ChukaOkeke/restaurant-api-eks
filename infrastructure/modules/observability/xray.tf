@@ -5,7 +5,7 @@
 
 # Define Custom X-Ray Sampling Rule for High-Priority API Traces
 resource "aws_xray_sampling_rule" "app_tracing" {
-  rule_name      = "${var.cluster_name}-${var.environment}-api-sampling"
+  rule_name      = "restaurant-${var.environment}-api-sampling"
   priority       = 1000
   reservoir_size = 1
   fixed_rate     = 0.05
