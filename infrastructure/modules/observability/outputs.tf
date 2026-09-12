@@ -13,6 +13,11 @@ output "amp_workspace_endpoint" {
   description = "Prometheus Remote Write endpoint for the OTel Collector"
 }
 
+output "amp_remote_write_endpoint" {
+  description = "Amazon Managed Prometheus Remote Write Endpoint"
+  value       = "${aws_prometheus_workspace.this.prometheus_endpoint}api/v1/remote_write"
+}
+
 output "prometheus_workspace_arn" {
   value       = aws_prometheus_workspace.this.arn
   description = "Amazon Managed Prometheus Workspace ARN"
