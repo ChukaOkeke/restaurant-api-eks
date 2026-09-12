@@ -126,7 +126,7 @@ jobs:
           ref: main
           path: gitops-repo
 
-      # CONSTRAINT 3: Update GitOps repo with Terraform outputs (ALB SG, ACM Cert, RDS Secret ARN, RDS Endpoint, and SQS Queue URL) using elevated PAT permissions and -chdir to avoid path collisions.
+      # CONSTRAINT 3: Update GitOps repo with Terraform outputs (ALB SG, ACM Cert, RDS Secret ARN, RDS Endpoint, SQS Queue URL, and AMP Remote Write Endpoint) using elevated PAT permissions and -chdir to avoid path collisions.
       - name: Update GitOps Repository with Infra Outputs
         run: |
           ALB_SG=$(terraform -chdir=./infrastructure output -raw alb_security_group_id)
@@ -135,22 +135,28 @@ jobs:
           # Extract hostname only by stripping :5432 port suffix
           RDS_ENDPOINT=$(terraform -chdir=./infrastructure output -raw rds_endpoint | cut -d':' -f1)
           SQS_QUEUE_URL=$(terraform -chdir=./infrastructure output -raw sqs_booking_queue_url)
+          AMP_ENDPOINT=$(terraform -chdir=./infrastructure output -raw amp_remote_write_endpoint)
           
+          # Use yq to dynamically update application values
           cd gitops-repo/values/production
-          
-          # Use yq to dynamically inject Terraform outputs into restaurant-api-values.yaml
           yq e -i ".ingress.albSecurityGroup = \"${ALB_SG}\"" restaurant-api-values.yaml
           yq e -i ".ingress.certificateArn = \"${CERT_ARN}\"" restaurant-api-values.yaml
           yq e -i ".secrets.rdsSecretName = \"${RDS_SECRET_ARN}\"" restaurant-api-values.yaml
           yq e -i ".config.DB_HOST = \"${RDS_ENDPOINT}\"" restaurant-api-values.yaml
           yq e -i ".env.sqsQueueUrl = \"${SQS_QUEUE_URL}\"" restaurant-api-values.yaml
 
+          # Update ADOT Collector values with dynamic AMP endpoint
+          cd ../addons
+          yq e -i ".config.exporters.prometheusremotewrite.endpoint = \"${AMP_ENDPOINT}\"" adot-collector-values.yaml
+          
+          # Stage all modified values files across production and addons
+          cd ../..
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add restaurant-api-values.yaml
+          git add values/
           
           # Use [skip ci] so this automated commit doesn't recursively trigger another pipeline
-          git commit -m "chore(infra): automated update of ALB SG, ACM Cert, RDS Secret ARN, RDS Endpoint, and SQS URL [skip ci]" || echo "No changes to commit"
+          git commit -m "chore(infra): automated update of ALB SG, ACM Cert, RDS Secret ARN, RDS Endpoint, SQS URL, and and AMP endpoint [skip ci]" || echo "No changes to commit"
           git push origin main
 
   # ===========================================================================
