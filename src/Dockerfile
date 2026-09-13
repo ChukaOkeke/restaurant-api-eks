@@ -11,8 +11,8 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 # Set the working directory inside the container
 WORKDIR /app
 
-# Install build-essential and PostgreSQL headers for compiling C extensions
-RUN apt-get update && apt-get install -y --no-install-recommends \
+# Upgrade base packages and install build tooling
+RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends \
     build-essential \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
@@ -36,8 +36,8 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PATH="/home/appuser/.local/bin:${PATH}"
 
-# Install minimal C runtime library for PostgreSQL
-RUN apt-get update && apt-get install -y --no-install-recommends \
+# Upgrade packages and install minimal C runtime library for PostgreSQL
+RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends \
     libpq5 \
     netcat-openbsd \
     && rm -rf /var/lib/apt/lists/*
