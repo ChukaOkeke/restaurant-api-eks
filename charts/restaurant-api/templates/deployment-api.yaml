@@ -3,6 +3,8 @@ kind: Deployment
 metadata:
   name: {{ .Chart.Name }}-api
   namespace: {{ .Release.Namespace }}
+  annotations:
+        instrumentation.opentelemetry.io/inject-python: "restaurant-api-instrumentation"
   labels:
     app.kubernetes.io/name: {{ .Chart.Name }}
     app.kubernetes.io/component: api
