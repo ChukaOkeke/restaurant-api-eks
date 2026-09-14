@@ -11,17 +11,17 @@ if [ "$RUN_MIGRATIONS" = "true" ] && [ -n "$DB_HOST" ] && [ -n "$DB_PORT" ]; the
     echo "Database is reachable."
 fi
 
-# Run migrations if explicitly enabled for this container execution, with OTEL disabled
+# Run migrations if explicitly enabled for this container execution
 if [ "$RUN_MIGRATIONS" = "true" ]; then
     echo "Running database migrations..."
-    OTEL_SDK_DISABLED=true python manage.py migrate --noinput
+    python manage.py migrate --noinput
 fi
 
-# Collect static assets if S3 static storage upload is enabled, with OTEL disabled
+# Collect static assets if S3 static storage upload is enabled
 if [ "$COLLECT_STATIC" = "true" ]; then
     echo "Collecting static assets..."
-    OTEL_SDK_DISABLED=true python manage.py collectstatic --noinput --clear
+    python manage.py collectstatic --noinput --clear
 fi
 
-# Execute the container's CMD or Kubernetes command override (Gunicorn starts with OTEL enabled)
+# Execute the container's CMD or Kubernetes command override
 exec "$@"
