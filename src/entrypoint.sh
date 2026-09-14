@@ -14,13 +14,13 @@ fi
 # Run migrations if explicitly enabled for this container execution
 if [ "$RUN_MIGRATIONS" = "true" ]; then
     echo "Running database migrations..."
-    python manage.py migrate --noinput
+    OTEL_PYTHON_DISABLED_INSTRUMENTATIONS=django python manage.py migrate --noinput
 fi
 
 # Collect static assets if S3 static storage upload is enabled
 if [ "$COLLECT_STATIC" = "true" ]; then
     echo "Collecting static assets..."
-    python manage.py collectstatic --noinput --clear
+    OTEL_PYTHON_DISABLED_INSTRUMENTATIONS=django python manage.py collectstatic --noinput --clear
 fi
 
 # Execute the container's CMD or Kubernetes command override

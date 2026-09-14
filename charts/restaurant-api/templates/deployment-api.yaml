@@ -54,6 +54,8 @@ spec:
             - secretRef:
                 name: {{ .Chart.Name }}-app-secrets # Injected via ExternalSecret
           env:
+            - name: PYTHONPATH
+              value: "/app"
             - name: AWS_REGION
               value: {{ .Values.env.awsRegion }}
             - name: DJANGO_SETTINGS_MODULE
