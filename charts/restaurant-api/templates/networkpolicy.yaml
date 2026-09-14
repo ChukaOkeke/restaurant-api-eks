@@ -24,6 +24,15 @@ spec:
     ports:
     - protocol: UDP
       port: 53
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: opentelemetry # ADOT Collector
+    ports:
+    - protocol: TCP
+      port: 4317
+    - protocol: TCP
+      port: 4318
   - ports:
     - protocol: TCP
       port: 443 # AWS API Endpoints (SQS, Secrets Manager, ECR)
