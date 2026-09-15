@@ -136,7 +136,11 @@ jobs:
           RDS_ENDPOINT=$(terraform -chdir=./infrastructure output -raw rds_endpoint | cut -d':' -f1)
           SQS_QUEUE_URL=$(terraform -chdir=./infrastructure output -raw sqs_booking_queue_url)
           AMP_ENDPOINT=$(terraform -chdir=./infrastructure output -raw amp_remote_write_endpoint)
-          
+          AMP_WS_ID=$(terraform -chdir=./infrastructure output -raw amp_workspace_id)
+
+          # AMP Workspace Query URL for OpenCost
+          OPENCOST_PROM_URL="http://127.0.0.1:8005/workspaces/${AMP_WS_ID}"
+
           # Navigate into the checked-out GitOps repo root
           cd gitops-repo
 
@@ -149,6 +153,9 @@ jobs:
 
           # 2. Update ADOT Metrics Collector CR with dynamic AMP endpoint
           yq e -i ".spec.config.exporters.prometheusremotewrite.endpoint = \"${AMP_ENDPOINT}\"" manifests/addons/adot/metrics-collector.yaml
+
+          # 3. Update OpenCost Helm Values with dynamic SigV4 Proxy AMP URL
+          yq e -i ".opencost.exporter.prometheus.external.url = \"${OPENCOST_PROM_URL}\"" values/addons/opencost-values.yaml
           
           # Stage all modified values and manifest files
           git config user.name "github-actions[bot]"
@@ -156,7 +163,7 @@ jobs:
           git add values/ manifests/
           
           # Use [skip ci] so this automated commit doesn't recursively trigger another pipeline
-          git commit -m "chore(infra): automated update of ALB SG, ACM Cert, RDS Secret ARN, RDS Endpoint, SQS URL, and and AMP endpoint [skip ci]" || echo "No changes to commit"
+          git commit -m "chore(infra): automated update of ALB SG, ACM Cert, RDS Secret ARN, RDS Endpoint, SQS URL, AMP, and OpenCost [skip ci]" || echo "No changes to commit"
           git push origin main
 
   # ===========================================================================
