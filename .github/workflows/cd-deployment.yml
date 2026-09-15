@@ -1,6 +1,6 @@
 name: CD - Asgard Zero-Trust Deployment
 
-# Decoupled App and Infra pipeline that triggers when a pull request is merged to the main branch, but only if changes are made to src/, charts/, infrastructure/, or both workflow files.
+# Decoupled App and Infra pipeline that triggers when a pull request is merged to the main branch, but only if changes are made to src/, charts/, infrastructure/, or both workflow files
 
 on:
   push:
