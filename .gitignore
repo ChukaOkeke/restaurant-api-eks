@@ -219,7 +219,7 @@ __marimo__/
 .venv
 .env
 *.plan
-*.json
+#*.json
 inventory.ini
 *.retry
 tfplan
