@@ -168,6 +168,11 @@ output "amp_remote_write_endpoint" {
   value       = module.observability.amp_remote_write_endpoint
 }
 
+output "amp_workspace_id" {
+  value       = module.observability.amp_workspace_id
+  description = "ID of the Amazon Managed Prometheus workspace"
+}
+
 output "grafana_workspace_endpoint" {
   value       = module.observability.grafana_workspace_endpoint
   description = "Amazon Managed Grafana URL"
