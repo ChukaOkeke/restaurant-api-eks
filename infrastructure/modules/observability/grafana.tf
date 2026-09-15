@@ -35,11 +35,12 @@ resource "aws_iam_role_policy" "grafana_datasources" {
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
-      # 1. Amazon Managed Prometheus Querying (Scoped to Workspace)
+      # 1. Amazon Managed Prometheus Querying
       {
         Sid    = "AMPServerQuery"
         Effect = "Allow"
         Action = [
+          "aps:DescribeWorkspace",
           "aps:QueryMetrics",
           "aps:GetMetricMetadata",
           "aps:GetSeries",
@@ -47,7 +48,7 @@ resource "aws_iam_role_policy" "grafana_datasources" {
         ]
         Resource = aws_prometheus_workspace.this.arn
       },
-      # 2. CloudWatch Log Content Querying (Scoped strictly to Log Group ARN)
+      # 2. CloudWatch Log Content Querying 
       {
         Sid    = "CloudWatchLogsScopedRead"
         Effect = "Allow"
@@ -65,23 +66,42 @@ resource "aws_iam_role_policy" "grafana_datasources" {
           "${aws_cloudwatch_log_group.container_logs.arn}:*"
         ]
       },
-      # 3. CloudWatch Log Discovery (Requires '*' as Describe APIs do not support ARNs)
+      # 3. CloudWatch Log Discovery & Metrics
       {
-        Sid      = "CloudWatchLogsDiscovery"
-        Effect   = "Allow"
-        Action   = ["logs:DescribeLogGroups"]
+        Sid    = "CloudWatchGlobalRead"
+        Effect = "Allow"
+        Action = [
+          "logs:DescribeLogGroups",
+          "cloudwatch:DescribeAlarmsForMetric",
+          "cloudwatch:DescribeAlarmHistory",
+          "cloudwatch:DescribeAlarms",
+          "cloudwatch:GetMetricData",
+          "cloudwatch:GetMetricStatistics",
+          "cloudwatch:ListMetrics",
+          "ec2:DescribeTags",
+          "ec2:DescribeInstances",
+          "ec2:DescribeRegions"
+        ]
         Resource = "*"
       },
-      # 4. AWS X-Ray Read (Requires '*' as X-Ray read APIs do not support ARNs)
+      # 4. AWS X-Ray & Application Signals Read
       {
-        Sid    = "XRayRead"
+        Sid    = "ApplicationSignalsAndXRayRead"
         Effect = "Allow"
         Action = [
           "xray:BatchGetTraces",
           "xray:GetTraceSummaries",
           "xray:GetTraceGraph",
           "xray:GetGroups",
-          "xray:GetServiceGraph"
+          "xray:GetServiceGraph",
+          "application-signals:GetService",
+          "application-signals:GetServiceLevelObjective",
+          "application-signals:ListServices",
+          "application-signals:ListServiceOperations",
+          "application-signals:ListServiceDependencies",
+          "application-signals:ListServiceDependents",
+          "application-signals:ListServiceLevelObjectives",
+          "application-signals:BatchGetServiceLevelObjectiveBudgetReport"
         ]
         Resource = "*"
       }
@@ -98,8 +118,15 @@ resource "aws_grafana_workspace" "this" {
   permission_type          = "CUSTOMER_MANAGED"
   role_arn                 = aws_iam_role.grafana.arn
 
-  # Data sources that Grafana can query
-  data_sources = ["PROMETHEUS", "CLOUDWATCH", "XRAY"]
+  # Data sources that Grafana can query (service-managed mode)
+  # data_sources = ["PROMETHEUS", "CLOUDWATCH", "XRAY"]
+
+  # Enable plugin administration so admins can install plugins from the catalog
+  configuration = jsonencode({
+    plugins = {
+      pluginAdminEnabled = true
+    }
+  })
 
   tags = {
     Name = "${var.cluster_name}-${var.environment}-amg-workspace"
