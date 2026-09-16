@@ -139,7 +139,7 @@ jobs:
           AMP_WS_ID=$(terraform -chdir=./infrastructure output -raw amp_workspace_id)
 
           # AMP Workspace Query URL for OpenCost
-          OPENCOST_PROM_URL="http://127.0.0.1:8005/workspaces/${AMP_WS_ID}"
+          OPENCOST_PROM_URL="http://aws-sigv4-proxy.opencost.svc.cluster.local:8005/workspaces/${AMP_WS_ID}"
 
           # Navigate into the checked-out GitOps repo root
           cd gitops-repo
@@ -155,7 +155,7 @@ jobs:
           yq e -i ".spec.config.exporters.prometheusremotewrite.endpoint = \"${AMP_ENDPOINT}\"" manifests/addons/adot/metrics-collector.yaml
 
           # 3. Update OpenCost Helm Values with dynamic SigV4 Proxy AMP URL
-          yq e -i ".opencost.exporter.prometheus.external.url = \"${OPENCOST_PROM_URL}\"" values/addons/opencost-values.yaml
+          yq e -i ".opencost.prometheus.external.url = \"${OPENCOST_PROM_URL}\"" values/addons/opencost-values.yaml
           
           # Stage all modified values and manifest files
           git config user.name "github-actions[bot]"
