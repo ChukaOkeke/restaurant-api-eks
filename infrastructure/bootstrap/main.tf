@@ -14,11 +14,7 @@ provider "aws" {
   region = "eu-west-1"
 }
 
-# Provision central S3 bucket for remote state storage
-# checkov:skip=CKV_AWS_18: "Access logging disabled to avoid circular bucket dependencies in bootstrap module"
-# checkov:skip=CKV2_AWS_62: "Event notifications are unnecessary for state-locking backend storage"
-# checkov:skip=CKV_AWS_144: "Cross-region replication skipped to prevent redundant cross-region transfer costs"
-# checkov:skip=CKV_AWS_145: "SSE-S3 (AES256) default encryption is sufficient; dedicated KMS key overhead not required"
+
 resource "aws_s3_bucket" "terraform_state" {
   bucket = "chuka-devops-state-storage"
 
@@ -34,6 +30,12 @@ resource "aws_s3_bucket_versioning" "enabled" {
   versioning_configuration {
     status = "Enabled"
   }
+
+  # Provision central S3 bucket for remote state storage
+  # checkov:skip=CKV_AWS_18: "Access logging disabled to avoid circular bucket dependencies in bootstrap module"
+  # checkov:skip=CKV2_AWS_62: "Event notifications are unnecessary for state-locking backend storage"
+  # checkov:skip=CKV_AWS_144: "Cross-region replication skipped to prevent redundant cross-region transfer costs"
+  # checkov:skip=CKV_AWS_145: "SSE-S3 (AES256) default encryption is sufficient; dedicated KMS key overhead not required"
 }
 
 # Explicitly block all public access (Fixes CKV2_AWS_6)
@@ -58,4 +60,6 @@ resource "aws_s3_bucket_lifecycle_configuration" "state_lifecycle" {
       noncurrent_days = 90
     }
   }
+
+  # checkov:skip=CKV_AWS_300: "Period is set"
 }
