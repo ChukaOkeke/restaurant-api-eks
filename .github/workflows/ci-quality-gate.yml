@@ -144,7 +144,7 @@ jobs:
       - name: "Setup HashiCorp Terraform CLI Studio"
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: "1.7.0" # Aligns with core production standards
+          terraform_version: "1.10.5" # Aligns with core production standards
 
       - name: "Verify Canonical Formatting Enforcement (terraform fmt)"
         run: terraform fmt -check -recursive
