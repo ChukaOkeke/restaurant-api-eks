@@ -70,7 +70,7 @@ resource "aws_iam_role_policy_attachment" "karpenter_controller" {
 
 resource "aws_eks_pod_identity_association" "karpenter" {
   cluster_name    = aws_eks_cluster.this.name
-  namespace       = "kube-system"
+  namespace       = "karpenter"
   service_account = "karpenter-sa"
   role_arn        = aws_iam_role.karpenter_controller.arn
 }
@@ -403,8 +403,8 @@ resource "aws_eks_pod_identity_association" "worker_sqs" {
 # ------------------------------------------------------------------------------
 # 7. Restaurant API Pod IAM Role & Pod Identity
 # ------------------------------------------------------------------------------
-resource "aws_iam_role" "api_s3" {
-  name = "restaurant-api-${var.environment}-api-s3-role"
+resource "aws_iam_role" "api" {
+  name = "restaurant-api-${var.environment}-api-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -421,44 +421,57 @@ resource "aws_iam_role" "api_s3" {
   })
 
   tags = {
-    Name = "restaurant-api-${var.environment}-api-s3-role"
+    Name = "restaurant-api-${var.environment}-api-role"
   }
 }
 
-resource "aws_iam_policy" "api_s3" {
-  name        = "restaurant-api-${var.environment}-api-s3-policy"
-  description = "Allows API pods to collect static assets and upload media to S3"
+resource "aws_iam_policy" "api" {
+  name        = "restaurant-api-${var.environment}-api-policy"
+  description = "Allows API pods to manage static assets in S3 and dispatch messages to the SQS booking queue"
 
   policy = jsonencode({
     Version = "2012-10-17"
-    Statement = [{
-      Effect = "Allow"
-      Action = [
-        "s3:PutObject",
-        "s3:GetObject",
-        "s3:DeleteObject",
-        "s3:ListBucket"
-      ]
-      Resource = [
-        var.s3_static_bucket_arn,
-        "${var.s3_static_bucket_arn}/*"
-      ]
-    }]
+    Statement = [
+      {
+        Sid    = "S3StaticBucketAccess"
+        Effect = "Allow"
+        Action = [
+          "s3:PutObject",
+          "s3:GetObject",
+          "s3:DeleteObject",
+          "s3:ListBucket"
+        ]
+        Resource = [
+          var.s3_static_bucket_arn,
+          "${var.s3_static_bucket_arn}/*"
+        ]
+      },
+      {
+        Sid    = "SQSBookingQueuePublisher"
+        Effect = "Allow"
+        Action = [
+          "sqs:SendMessage",
+          "sqs:GetQueueAttributes",
+          "sqs:GetQueueUrl"
+        ]
+        Resource = var.booking_queue_arn
+      }
+    ]
   })
 
   tags = {
-    Name = "restaurant-api-${var.environment}-api-s3-policy"
+    Name = "restaurant-api-${var.environment}-api-policy"
   }
 }
 
-resource "aws_iam_role_policy_attachment" "api_s3" {
-  role       = aws_iam_role.api_s3.name
-  policy_arn = aws_iam_policy.api_s3.arn
+resource "aws_iam_role_policy_attachment" "api" {
+  role       = aws_iam_role.api.name
+  policy_arn = aws_iam_policy.api.arn
 }
 
-resource "aws_eks_pod_identity_association" "api_s3" {
+resource "aws_eks_pod_identity_association" "api" {
   cluster_name    = aws_eks_cluster.this.name
   namespace       = "restaurant-api"
   service_account = "restaurant-api-sa"
-  role_arn        = aws_iam_role.api_s3.arn
+  role_arn        = aws_iam_role.api.arn
 }

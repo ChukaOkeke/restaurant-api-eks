@@ -5,11 +5,14 @@
 # Local helper to define the exact AWS service endpoints required by your backend
 locals {
   interface_services = {
-    ecr_api        = "com.amazonaws.${data.aws_region.current.name}.ecr.api"
-    ecr_dkr        = "com.amazonaws.${data.aws_region.current.name}.ecr.dkr"
-    sqs            = "com.amazonaws.${data.aws_region.current.name}.sqs"
-    secretsmanager = "com.amazonaws.${data.aws_region.current.name}.secretsmanager"
-    amp            = "com.amazonaws.${data.aws_region.current.name}.aps-workspaces" # Amazon Managed Prometheus
+    ecr_api         = "com.amazonaws.${data.aws_region.current.name}.ecr.api"
+    ecr_dkr         = "com.amazonaws.${data.aws_region.current.name}.ecr.dkr"
+    sqs             = "com.amazonaws.${data.aws_region.current.name}.sqs"
+    secretsmanager  = "com.amazonaws.${data.aws_region.current.name}.secretsmanager"
+    amp             = "com.amazonaws.${data.aws_region.current.name}.aps-workspaces" # Amazon Managed Prometheus
+    cloudwatch_logs = "com.amazonaws.${data.aws_region.current.name}.logs"           # CloudWatch Logs (Log shipping)
+    monitoring      = "com.amazonaws.${data.aws_region.current.name}.monitoring"     # CloudWatch Metrics & Alarms
+    xray            = "com.amazonaws.${data.aws_region.current.name}.xray"           # AWS X-Ray (Distributed Tracing)
   }
 }
 
@@ -26,7 +29,7 @@ resource "aws_vpc_endpoint" "interfaces" {
   security_group_ids = [aws_security_group.vpc_endpoints.id]
 
   # CRITICAL: Enables private DNS hostname resolution (e.g., sqs.eu-west-1.amazonaws.com resolves to private IPs in the VPC instead of public endpoints) 
-  # so your Python/Django SDK code doesn't need custom endpoint URL overrides.
+  # so your Python/Django SDK code and OpenTelemetry agents don't need custom endpoint URL overrides.
   private_dns_enabled = true
 
   tags = {
