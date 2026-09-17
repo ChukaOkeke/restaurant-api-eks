@@ -257,9 +257,7 @@ jobs:
       - name: Execute Lightweight API DAST (Nuclei)
         uses: projectdiscovery/nuclei-action@v3
         with:
-          target: "http://localhost:8000"
-          urls: "http://localhost:8000/api/menu-items/"
-          flags: "-severity low,medium,high,critical -stop-at-first-path"
+          args: "-u http://localhost:8000/api/menu-items/ -u http://localhost:8000/api/booking/tables/ -tags api,generic -severity low,medium,high,critical"
 
       - name: Cleanup Ephemeral Container
         if: always()
