@@ -242,6 +242,29 @@ jobs:
           ignore-unfixed: true
           severity: 'CRITICAL,HIGH'
 
+      - name: Spin Up Ephemeral Application Container
+        run: |
+          docker run -d --name ephemeral-api \
+            -p 8000:8000 \
+            -e DJANGO_SETTINGS_MODULE=config.settings \
+            -e SECRET_KEY="dast-ci-test-key" \
+            -e CI_MODE="True" \
+            ${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
+          
+          # Wait for application startup healthcheck
+          timeout 30s bash -c 'until curl -s http://localhost:8000/healthz; do sleep 2; done'
+
+      - name: Execute Lightweight API DAST (Nuclei)
+        uses: projectdiscovery/nuclei-action@v3
+        with:
+          target: "http://localhost:8000"
+          urls: "http://localhost:8000/api/menu-items/"
+          flags: "-severity low,medium,high,critical -stop-at-first-path"
+
+      - name: Cleanup Ephemeral Container
+        if: always()
+        run: docker stop ephemeral-api && docker rm ephemeral-api
+
       - name: Push Image to Amazon ECR
         run: |
           REGISTRY=${{ steps.login-ecr.outputs.registry }}
