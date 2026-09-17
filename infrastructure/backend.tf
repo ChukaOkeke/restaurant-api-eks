@@ -6,7 +6,7 @@ terraform {
     region       = "eu-west-1"
     use_lockfile = true # Enables native S3 locking
     encrypt      = true
-    # profile        = "iamadmin-project"
+    # profile      = "iamadmin-project"
   }
 }
 
