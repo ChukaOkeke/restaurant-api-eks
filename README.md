@@ -16,7 +16,7 @@ Follow these steps to bootstrap the Zero-Trust OIDC identity layer, provision th
   - AWS CLI & Kubectl: Installed locally to connect to and manage the remote EKS cluster.  
 
  2. Repository Setup  
-  This project uses a dual-repo structure: App repo and GitOps repo. Clone the app repository containing the source code, Helm templates, and base infra configuration to your local machine:
+  This project uses a dual-repo structure: App repo and [GitOps repo](https://github.com/ChukaOkeke/restaurant-api-eks-gitops). Clone the app repository containing the source code, Helm templates, and base infra configuration to your local machine:
 
 ```bash  
 git clone https://github.com/ChukaOkeke/restaurant-api-eks.git
