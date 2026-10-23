@@ -31,26 +31,31 @@ class MenuItemsView(generics.ListCreateAPIView):
     def get(self, request, *args, **kwargs):
         cache_key = 'menu_items_list'
         
-        # 1. Check Redis cache first (Read Optimization)
-        cached_data = cache.get(cache_key)
-        if cached_data is not None:
-            return Response(cached_data, status=status.HTTP_200_OK)
+        # 1. Try reading from Redis cache safely
+        try:
+            cached_data = cache.get(cache_key)
+            if cached_data is not None:
+                return Response(cached_data, status=status.HTTP_200_OK)
+        except Exception:
+            pass  # Fall back to database query if Redis is unreachable
 
-        # 2. Cache Miss: Fall back to database query via parent class implementation
+        # 2. Cache Miss or Redis offline: Fall back to database query
         response = super().get(request, *args, **kwargs)
 
-        # 3. Store the response data in Redis with a TTL to protect RDS from read exhaustion
-        cache.set(cache_key, response.data, timeout=getattr(settings, 'CACHE_TTL', 300))
+        # 3. Try storing in Redis safely
+        try:
+            cache.set(cache_key, response.data, timeout=getattr(settings, 'CACHE_TTL', 300))
+        except Exception:
+            pass
 
         return response
 
     def perform_create(self, serializer):
-        """
-        Invalidate cache on write operations (POST) to maintain data consistency 
-        so customers immediately see newly added menu items.
-        """
         serializer.save()
-        cache.delete('menu_items_list')
+        try:
+            cache.delete('menu_items_list')
+        except Exception:
+            pass
 
 
 # Class-based view to handle a single Menu item (Synchronous Path with Redis Cache-Aside Pattern).
@@ -63,30 +68,43 @@ class SingleMenuItemView(generics.RetrieveUpdateAPIView, generics.DestroyAPIView
         cache_key = f'menu_item_{pk}'
         
         # 1. Check cache for this specific item
-        cached_data = cache.get(cache_key)
-        if cached_data is not None:
-            return Response(cached_data, status=status.HTTP_200_OK)
+        try:
+            cached_data = cache.get(cache_key)
+            if cached_data is not None:
+                return Response(cached_data, status=status.HTTP_200_OK)
+        except Exception:
+            pass
 
         # 2. Cache Miss: Fetch from RDS PostgreSQL
         response = super().get(request, *args, **kwargs)
         
         # 3. Store in Redis
-        cache.set(cache_key, response.data, timeout=getattr(settings, 'CACHE_TTL', 300))
+        try:
+            cache.set(cache_key, response.data, timeout=getattr(settings, 'CACHE_TTL', 300))
+        except Exception:
+            pass
+            
         return response
 
     def perform_update(self, serializer):
         serializer.save()
         pk = self.kwargs.get('pk')
         # Invalidate both the specific item cache and the general menu list cache
-        cache.delete(f'menu_item_{pk}')
-        cache.delete('menu_items_list')
+        try:
+            cache.delete(f'menu_item_{pk}')
+            cache.delete('menu_items_list')
+        except Exception:
+            pass
 
     def perform_destroy(self, instance):
         pk = instance.pk
         instance.delete()
         # Invalidate both caches on deletion
-        cache.delete(f'menu_item_{pk}')
-        cache.delete('menu_items_list')
+        try:
+            cache.delete(f'menu_item_{pk}')
+            cache.delete('menu_items_list')
+        except Exception:
+            pass
         
 
 # Viewset view to handle Bookings (Asynchronous Path).

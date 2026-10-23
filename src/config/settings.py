@@ -105,23 +105,28 @@ else:
 
 
 # ========================================================================================
-# 3. CACHE CONFIGURATION (ElastiCache Redis Backend)
+# 3. CACHE CONFIGURATION (ElastiCache Redis or LocMemCache Fallback for Testing/CI)
 # ========================================================================================
-CACHES = {
-    "default": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": os.getenv("REDIS_URL", "rediss://127.0.0.1:6379/1"),
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
-            # Optional: Enable SSL/TLS parameters if required by your client configuration
-            "CONNECTION_POOL_KWARGS": {
-                "ssl_cert_reqs": None # Bypasses strict self-signed certificate validation in managed redis environments if needed
+if os.getenv('CI_MODE', 'False') == 'True' or 'test' in sys.argv:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        }
+    }
+else:
+    CACHES = {
+        "default": {
+            "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": os.getenv("REDIS_URL", "rediss://127.0.0.1:6379/1"),
+            "OPTIONS": {
+                "CLIENT_CLASS": "django_redis.client.DefaultClient",
+                "CONNECTION_POOL_KWARGS": {
+                    "ssl_cert_reqs": None
+                }
             }
         }
     }
-}
 
-# Cache time-to-live (TTL) in seconds (e.g., 5 minutes for menu items)
 CACHE_TTL = 300
 
 # Password validation
