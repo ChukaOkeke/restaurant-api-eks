@@ -8,6 +8,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from .models import MenuItem, Booking
 from .serializers import MenuSerializer, BookingSerializer
+from django.core.cache import cache
+from django.conf import settings
 
 
 # Create your views here.
@@ -21,17 +23,71 @@ def index(request):
     return render(request, 'restaurant/index.html')
 
 
-# Class-based view to handle Menu items (Synchronous Path).
+# Class-based view to handle Menu items (Synchronous Path with Redis Cache-Aside Pattern).
 class MenuItemsView(generics.ListCreateAPIView):
     queryset = MenuItem.objects.all()  # Fetch all menu items from the database
     serializer_class = MenuSerializer  # Serialize the menu items
 
+    def get(self, request, *args, **kwargs):
+        cache_key = 'menu_items_list'
+        
+        # 1. Check Redis cache first (Read Optimization)
+        cached_data = cache.get(cache_key)
+        if cached_data is not None:
+            return Response(cached_data, status=status.HTTP_200_OK)
 
-# Class-based view to handle a single Menu item (Synchronous Path).
+        # 2. Cache Miss: Fall back to database query via parent class implementation
+        response = super().get(request, *args, **kwargs)
+
+        # 3. Store the response data in Redis with a TTL to protect RDS from read exhaustion
+        cache.set(cache_key, response.data, timeout=getattr(settings, 'CACHE_TTL', 300))
+
+        return response
+
+    def perform_create(self, serializer):
+        """
+        Invalidate cache on write operations (POST) to maintain data consistency 
+        so customers immediately see newly added menu items.
+        """
+        serializer.save()
+        cache.delete('menu_items_list')
+
+
+# Class-based view to handle a single Menu item (Synchronous Path with Redis Cache-Aside Pattern).
 class SingleMenuItemView(generics.RetrieveUpdateAPIView, generics.DestroyAPIView):
     queryset = MenuItem.objects.all()  # Fetch menu item from the database
     serializer_class = MenuSerializer  # Serialize the menu item
 
+    def get(self, request, *args, **kwargs):
+        pk = kwargs.get('pk')
+        cache_key = f'menu_item_{pk}'
+        
+        # 1. Check cache for this specific item
+        cached_data = cache.get(cache_key)
+        if cached_data is not None:
+            return Response(cached_data, status=status.HTTP_200_OK)
+
+        # 2. Cache Miss: Fetch from RDS PostgreSQL
+        response = super().get(request, *args, **kwargs)
+        
+        # 3. Store in Redis
+        cache.set(cache_key, response.data, timeout=getattr(settings, 'CACHE_TTL', 300))
+        return response
+
+    def perform_update(self, serializer):
+        serializer.save()
+        pk = self.kwargs.get('pk')
+        # Invalidate both the specific item cache and the general menu list cache
+        cache.delete(f'menu_item_{pk}')
+        cache.delete('menu_items_list')
+
+    def perform_destroy(self, instance):
+        pk = instance.pk
+        instance.delete()
+        # Invalidate both caches on deletion
+        cache.delete(f'menu_item_{pk}')
+        cache.delete('menu_items_list')
+        
 
 # Viewset view to handle Bookings (Asynchronous Path).
 class BookingViewSet(viewsets.ModelViewSet):

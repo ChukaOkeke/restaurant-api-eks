@@ -104,6 +104,26 @@ else:
     }
 
 
+# ========================================================================================
+# 3. CACHE CONFIGURATION (ElastiCache Redis Backend)
+# ========================================================================================
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": os.getenv("REDIS_URL", "rediss://127.0.0.1:6379/1"),
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            # Optional: Enable SSL/TLS parameters if required by your client configuration
+            "CONNECTION_POOL_KWARGS": {
+                "ssl_cert_reqs": None # Bypasses strict self-signed certificate validation in managed redis environments if needed
+            }
+        }
+    }
+}
+
+# Cache time-to-live (TTL) in seconds (e.g., 5 minutes for menu items)
+CACHE_TTL = 300
+
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
 
@@ -147,7 +167,7 @@ REST_FRAMEWORK = {
 
 
 # =========================================================================
-# 3. STATIC & MEDIA ASSETS (S3 + CloudFront Integration)
+# 4. STATIC & MEDIA ASSETS (S3 + CloudFront Integration)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 # =========================================================================
 # Django finds assets inside 'restaurant/static/' automatically during collectstatic

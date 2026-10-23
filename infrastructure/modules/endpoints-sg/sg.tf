@@ -69,6 +69,19 @@ resource "aws_security_group" "database" {
   }
 }
 
+# Redis Security Group
+resource "aws_security_group" "redis" {
+  name        = "restaurant-api-${var.environment}-redis-sg"
+  description = "Security group for ElastiCache Redis cluster"
+  vpc_id      = var.vpc_id
+
+  # checkov:skip=CKV2_AWS_5:Security group uses decoupled standalone rules to avoid cyclical dependencies.
+
+  tags = {
+    Name = "restaurant-api-${var.environment}-redis-sg"
+  }
+}
+
 
 # ------------------------------------------------------------------------------
 # 2. DECOUPLED STANDALONE SECURITY GROUP RULES
@@ -164,6 +177,15 @@ resource "aws_vpc_security_group_egress_rule" "nodes_to_endpoints" {
   referenced_security_group_id = aws_security_group.vpc_endpoints.id
 }
 
+resource "aws_vpc_security_group_egress_rule" "nodes_to_redis" {
+  security_group_id            = aws_security_group.eks_nodes.id
+  description                  = "Allow worker nodes/pods to reach ElastiCache Redis cluster"
+  from_port                    = 6379
+  to_port                      = 6379
+  ip_protocol                  = "tcp"
+  referenced_security_group_id = aws_security_group.redis.id
+}
+
 resource "aws_vpc_security_group_egress_rule" "nodes_to_database" {
   security_group_id            = aws_security_group.eks_nodes.id
   description                  = "Allow worker nodes/pods to reach RDS PostgreSQL database"
@@ -198,6 +220,16 @@ resource "aws_vpc_security_group_ingress_rule" "database_from_nodes" {
   description                  = "Allow PostgreSQL access strictly from EKS worker node workloads"
   from_port                    = var.db_port
   to_port                      = var.db_port
+  ip_protocol                  = "tcp"
+  referenced_security_group_id = aws_security_group.eks_nodes.id
+}
+
+# --- REDIS RULES ---
+resource "aws_vpc_security_group_ingress_rule" "redis_from_nodes" {
+  security_group_id            = aws_security_group.redis.id
+  description                  = "Allow Redis access strictly from EKS worker node workloads"
+  from_port                    = 6379
+  to_port                      = 6379
   ip_protocol                  = "tcp"
   referenced_security_group_id = aws_security_group.eks_nodes.id
 }

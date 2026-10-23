@@ -52,6 +52,11 @@ variable "app_secret_arn" {
   type        = string
 }
 
+variable "redis_secret_arn" {
+  description = "ARN of the Secrets Manager secret containing Redis credentials"
+  type        = string
+}
+
 variable "node_instance_types" {
   description = "List of EC2 instance types for the node group"
   type        = list(string)
@@ -96,3 +101,4 @@ variable "cloudwatch_log_group_arn" {
   type        = string
   description = "ARN of the CloudWatch Log Group for ADOT Collector logs"
 }
+

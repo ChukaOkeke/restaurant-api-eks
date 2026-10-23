@@ -56,6 +56,10 @@ output "github_actions_role_arn" {
   value       = module.security.github_actions_role_arn
 }
 
+output "redis_secret_arn" {
+  value       = module.security.redis_secret_arn
+  description = "AWS Secrets Manager ARN for Redis AUTH credentials"
+}
 
 # --- Compute Outputs ---
 output "cluster_name" {
@@ -86,6 +90,11 @@ output "rds_endpoint" {
 output "rds_master_secret_arn" {
   description = "Secrets Manager ARN for RDS master user credentials (consumed by ESO)"
   value       = module.database.db_master_secret_arn
+}
+
+output "redis_primary_endpoint_address" {
+  value       = module.database.redis_primary_endpoint_address
+  description = "ElastiCache Redis primary endpoint address for GitOps injection"
 }
 
 
