@@ -104,6 +104,31 @@ else:
     }
 
 
+# ========================================================================================
+# 3. CACHE CONFIGURATION (ElastiCache Redis or LocMemCache Fallback for Testing/CI)
+# ========================================================================================
+if os.getenv('CI_MODE', 'False') == 'True' or 'test' in sys.argv:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        }
+    }
+else:
+    CACHES = {
+        "default": {
+            "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": os.getenv("REDIS_URL", "rediss://127.0.0.1:6379/1"),
+            "OPTIONS": {
+                "CLIENT_CLASS": "django_redis.client.DefaultClient",
+                "CONNECTION_POOL_KWARGS": {
+                    "ssl_cert_reqs": None
+                }
+            }
+        }
+    }
+
+CACHE_TTL = 300
+
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
 
@@ -147,7 +172,7 @@ REST_FRAMEWORK = {
 
 
 # =========================================================================
-# 3. STATIC & MEDIA ASSETS (S3 + CloudFront Integration)
+# 4. STATIC & MEDIA ASSETS (S3 + CloudFront Integration)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 # =========================================================================
 # Django finds assets inside 'restaurant/static/' automatically during collectstatic

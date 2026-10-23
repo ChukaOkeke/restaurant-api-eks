@@ -26,3 +26,18 @@ variable "multi_az" {
   type        = bool
   description = "Enable Multi-AZ deployment (Keep false for dev cost optimization, set true in production)"
 }
+
+variable "redis_node_type" {
+  type        = string
+  description = "ElastiCache node instance type"
+}
+
+variable "redis_num_cache_clusters" {
+  type        = number
+  description = "Number of cache clusters in the replication group"
+}
+
+variable "redis_sg_id" {
+  type        = string
+  description = "Security Group ID for ElastiCache Redis"
+}

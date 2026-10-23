@@ -38,9 +38,11 @@ module "endpoints_sg" {
 module "security" {
   source = "./modules/security"
 
-  environment = var.environment
-  github_org  = var.github_org
-  github_repo = var.github_repo
+  environment                    = var.environment
+  github_org                     = var.github_org
+  github_repo                    = var.github_repo
+  redis_auth_token               = module.database.redis_auth_token
+  redis_primary_endpoint_address = module.database.redis_primary_endpoint_address
 }
 
 
@@ -62,6 +64,7 @@ module "compute" {
   eks_control_plane_security_group_id = module.endpoints_sg.eks_control_plane_security_group_id
   eks_node_security_group_id          = module.endpoints_sg.eks_node_security_group_id
   app_secret_arn                      = module.security.app_secret_arn
+  redis_secret_arn                    = module.security.redis_secret_arn
   domain_name                         = var.domain_name
   booking_queue_arn                   = module.messaging.booking_queue_arn
   s3_static_bucket_arn                = module.storage.s3_static_bucket_arn
@@ -76,16 +79,19 @@ module "compute" {
 
 
 # ------------------------------------------------------------------------------
-# Module 5: Database (Subnet Group & RDS PostgreSQL instance)
+# Module 5: Database (RDS PostgreSQL & ElastiCache Redis Tier)
 # ------------------------------------------------------------------------------
 module "database" {
   source = "./modules/database"
 
-  environment        = var.environment
-  private_subnet_ids = module.vpc.private_subnet_ids
-  rds_sg_id          = module.endpoints_sg.database_security_group_id
-  db_instance_class  = var.db_instance_class
-  multi_az           = var.multi_az
+  environment              = var.environment
+  private_subnet_ids       = module.vpc.private_subnet_ids
+  rds_sg_id                = module.endpoints_sg.database_security_group_id
+  redis_sg_id              = module.endpoints_sg.redis_security_group_id
+  db_instance_class        = var.db_instance_class
+  multi_az                 = var.multi_az
+  redis_node_type          = var.redis_node_type
+  redis_num_cache_clusters = var.redis_num_cache_clusters
 }
 
 

@@ -1,5 +1,5 @@
 # ==============================================================================
-# DATABASE MODULE MAIN RESOURCES
+# POSTGRESQL DATABASE RESOURCES
 # ==============================================================================
 
 # DB Subnet Group spanning private subnets across multiple AZs (Tells RDS which subnets it is allowed to use)

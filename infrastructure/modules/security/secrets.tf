@@ -32,3 +32,28 @@ resource "aws_secretsmanager_secret_version" "app_secrets_template" {
     ignore_changes = [secret_string]
   }
 }
+
+
+# Store Redis Auth Token and Endpoint securely in AWS Secrets Manager
+# Storing auth token as a standalone secret
+resource "aws_secretsmanager_secret" "redis_secret" {
+  name                    = "restaurant-api-${var.environment}-redis-secret"
+  description             = "Redis authentication token and connection string"
+  recovery_window_in_days = 0 # FinOps safety: Can use 7 in prod. short window allows faster recreation testing if wiped
+
+  # checkov:skip=CKV_AWS_149:KMS encryption is bypassed in dev to eliminate custom key costs; default cloud security is sufficient
+  # checkov:skip=CKV2_AWS_57:Automatic secret rotation is bypassed in dev to avoid the engineering overhead of maintaining a rotation Lambda function and managing synchronized states during iterative testing blocks.
+
+  tags = {
+    Name = "restaurant-api-${var.environment}-redis-secret"
+  }
+}
+
+resource "aws_secretsmanager_secret_version" "redis_secret_val" {
+  secret_id = aws_secretsmanager_secret.redis_secret.id
+  secret_string = jsonencode({
+    REDIS_URL      = "rediss://:${var.redis_auth_token}@${var.redis_primary_endpoint_address}:6379/1"
+    REDIS_PASSWORD = var.redis_auth_token
+    REDIS_HOST     = var.redis_primary_endpoint_address
+  })
+}

@@ -153,6 +153,18 @@ variable "multi_az" {
   description = "Enable Multi-AZ deployment (Keep false for dev cost optimization, set true in production)"
 }
 
+variable "redis_node_type" {
+  type        = string
+  default     = "cache.t4g.micro"
+  description = "Instance type for ElastiCache Redis nodes"
+}
+
+variable "redis_num_cache_clusters" {
+  type        = number
+  default     = 2
+  description = "Number of cache nodes for the ElastiCache replication group"
+}
+
 
 # MESSAGING CONFIGURATIONS (Asynchronous Queue Tuning)
 variable "queue_delay_seconds" {

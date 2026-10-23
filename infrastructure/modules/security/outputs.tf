@@ -17,3 +17,13 @@ output "github_actions_role_arn" {
   description = "ARN of the GitHub Actions OIDC execution role"
   value       = aws_iam_role.github_actions.arn
 }
+
+output "redis_secret_arn" {
+  value       = aws_secretsmanager_secret.redis_secret.arn
+  description = "ARN of the Secrets Manager secret containing Redis credentials"
+}
+
+output "redis_secret_name" {
+  value       = aws_secretsmanager_secret.redis_secret.name
+  description = "Name of the Secrets Manager secret containing Redis credentials"
+}
